@@ -1,0 +1,93 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "laranail/auth-preset",
+    "type": "library",
+    "description": "Authentication preset for laranail/auth-kit — Blade, Livewire, and Inertia scaffolding.",
+    "keywords": [
+        "laravel",
+        "authentication",
+        "scaffolding",
+        "auth",
+        "preset",
+        "blade",
+        "livewire",
+        "inertia"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Simtabi",
+            "email": "hello@simtabi.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../laranail-auth-kit",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
+    "require": {
+        "php": "^8.4 | ^8.5",
+        "laravel/framework": "^13.0",
+        "laranail/auth-kit": "dev-main"
+    },
+    "require-dev": {
+        "pestphp/pest": "^4.0",
+        "pestphp/pest-plugin-laravel": "^4.0",
+        "laravel/pint": "^1.0",
+        "orchestra/testbench": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Simtabi\\Laranail\\AuthPreset\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Simtabi\\Laranail\\AuthPreset\\AuthPresetServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "format": [
+            "vendor/bin/pint --parallel"
+        ],
+        "test": [
+            "vendor/bin/pest --parallel"
+        ],
+        "lint": [
+            "vendor/bin/pint --ansi"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "preferred-install": "dist",
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "archive": {
+        "exclude": [
+            "/tests",
+            "/.github",
+            "/.gitignore",
+            "phpunit.xml",
+            "pint.json",
+            "workbench",
+            "testbench.yaml"
+        ]
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

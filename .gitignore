@@ -1,0 +1,9 @@
+/vendor
+composer.lock
+.phpunit.cache
+.phpunit.result.cache
+/build
+/.idea
+/.vscode
+laravel-fortify-auth-packages.md
+.DS_Store
