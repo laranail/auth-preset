@@ -9,8 +9,7 @@ return [
     | Frontend Stack
     |--------------------------------------------------------------------------
     |
-    | The frontend stack to scaffold. Options: 'blade', 'livewire',
-    | 'inertia-vue', 'inertia-react'.
+    | The frontend stack to scaffold. Blade is currently supported.
     |
     */
 
@@ -27,11 +26,16 @@ return [
     */
 
     'features' => [
-        'email_login'    => (bool) env(key: 'AUTH_PRESET_EMAIL_LOGIN', default: true),
-        'username_login' => (bool) env(key: 'AUTH_PRESET_USERNAME_LOGIN', default: true),
-        'api_routes'     => (bool) env(key: 'AUTH_PRESET_API_ROUTES', default: true),
-        'web_routes'     => (bool) env(key: 'AUTH_PRESET_WEB_ROUTES', default: true),
+        \Simtabi\Laranail\AuthPreset\Features::login(),
+        \Simtabi\Laranail\AuthPreset\Features::registration(),
+        \Simtabi\Laranail\AuthPreset\Features::api(),
     ],
+
+    'routes' => [
+        'mode' => env(key: 'AUTH_PRESET_ROUTES_MODE', default: 'package'),
+    ],
+
+    'guard' => env(key: 'AUTH_PRESET_GUARD', default: 'web'),
 
     /*
     |--------------------------------------------------------------------------
@@ -51,8 +55,8 @@ return [
     */
 
     'middleware' => [
-        'web' => ['web', 'guest'],
-        'api' => ['api', 'guest', 'throttle:60,1'],
+        'web' => ['web'],
+        'api' => ['api', 'throttle:60,1'],
     ],
 
     /*
@@ -65,7 +69,8 @@ return [
     */
 
     'redirects' => [
-        'after_login' => env(key: 'AUTH_PRESET_AFTER_LOGIN', default: '/dashboard'),
+        'after_login'        => env(key: 'AUTH_PRESET_AFTER_LOGIN', default: '/dashboard'),
+        'after_registration' => env(key: 'AUTH_PRESET_AFTER_REGISTRATION', default: '/dashboard'),
     ],
 
 ];

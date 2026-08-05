@@ -11,6 +11,11 @@ use Simtabi\Laranail\Auth\Http\Controllers\AbstractAttemptEmailPasswordLoginCont
 
 class LoginController extends AbstractAttemptEmailPasswordLoginController
 {
+    protected function guard(): string
+    {
+        return \Simtabi\Laranail\AuthPreset\Support\AuthPreset::guard();
+    }
+
     protected function passed(Request $request, AuthResult $result): JsonResponse
     {
         return response()->json(data: [

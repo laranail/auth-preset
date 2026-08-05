@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\AuthPreset;
 
 use Illuminate\Support\ServiceProvider;
-use Simtabi\Laranail\AuthPreset\Support\AuthPreset;
 use Simtabi\Laranail\AuthPreset\Commands\InstallCommand;
 
 class AuthPresetServiceProvider extends ServiceProvider
@@ -21,7 +20,6 @@ class AuthPresetServiceProvider extends ServiceProvider
         $this->registerCommands();
         $this->loadViews();
         $this->loadRoutes();
-        $this->registerLivewireComponents();
     }
 
     private function registerPublishes(): void
@@ -50,20 +48,6 @@ class AuthPresetServiceProvider extends ServiceProvider
             'auth-preset-views'
         );
 
-        $this->publishes(
-            [__DIR__ . '/../resources/views/livewire' => resource_path('views/livewire')],
-            'auth-preset-livewire'
-        );
-
-        $this->publishes(
-            [__DIR__ . '/../src/Livewire' => app_path('Livewire')],
-            'auth-preset-livewire'
-        );
-
-        $this->publishes(
-            [__DIR__ . '/../resources/views/inertia' => resource_path('js/Pages/auth')],
-            'auth-preset-inertia'
-        );
     }
 
     private function registerCommands(): void
@@ -90,35 +74,12 @@ class AuthPresetServiceProvider extends ServiceProvider
     private function registerRoutes(): void
     {
         $this->app->booted(function (): void {
-            $features = config('auth-preset.features', []);
-
-            if (($features['web_routes'] ?? false) && file_exists($path = base_path('routes/auth-preset-web.php'))) {
-                require $path;
-            } elseif ($features['web_routes'] ?? false) {
-                $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+            if (config('auth-preset.routes.mode', 'package') !== 'package') {
+                return;
             }
 
-            if (($features['api_routes'] ?? false) && file_exists($path = base_path('routes/auth-preset-api.php'))) {
-                require $path;
-            } elseif ($features['api_routes'] ?? false) {
-                $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
-            }
+            $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+            $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
         });
-    }
-
-    private function registerLivewireComponents(): void
-    {
-        if (AuthPreset::stack() !== \Simtabi\Laranail\AuthPreset\Enums\FrontendStack::Livewire) {
-            return;
-        }
-
-        if (! class_exists(\Livewire\Livewire::class)) {
-            return;
-        }
-
-        \Livewire\Livewire::component('auth-preset.login', \Simtabi\Laranail\AuthPreset\Livewire\Login::class);
-        \Livewire\Livewire::component('auth-preset.username-login', \Simtabi\Laranail\AuthPreset\Livewire\UsernameLogin::class);
-        \Livewire\Livewire::component('auth-preset.check-email-exists', \Simtabi\Laranail\AuthPreset\Livewire\CheckEmailExists::class);
-        \Livewire\Livewire::component('auth-preset.check-username-exists', \Simtabi\Laranail\AuthPreset\Livewire\CheckUsernameExists::class);
     }
 }

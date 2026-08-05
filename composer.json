@@ -2,16 +2,14 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "laranail/auth-preset",
     "type": "library",
-    "description": "Authentication preset for laranail/auth-kit — Blade, Livewire, and Inertia scaffolding.",
+    "description": "Blade authentication preset for laranail/auth-kit.",
     "keywords": [
         "laravel",
         "authentication",
         "scaffolding",
         "auth",
         "preset",
-        "blade",
-        "livewire",
-        "inertia"
+        "blade"
     ],
     "license": "MIT",
     "authors": [

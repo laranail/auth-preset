@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\AuthPreset\Support;
 
+use LogicException;
 use Simtabi\Laranail\AuthPreset\Enums\FrontendStack;
 
 class AuthPreset
@@ -13,27 +14,9 @@ class AuthPreset
         return FrontendStack::from(value: config(key: 'auth-preset.stack', default: 'blade'));
     }
 
-    public static function isInertia(): bool
+    public static function guard(): string
     {
-        return in_array(self::stack(), [
-            FrontendStack::InertiaVue,
-            FrontendStack::InertiaReact,
-        ]);
-    }
-
-    public static function isInertiaVue(): bool
-    {
-        return self::stack() === FrontendStack::InertiaVue;
-    }
-
-    public static function isInertiaReact(): bool
-    {
-        return self::stack() === FrontendStack::InertiaReact;
-    }
-
-    public static function enabled(string $feature): bool
-    {
-        return (bool) config(key: "auth-preset.features.{$feature}", default: false);
+        return config(key: 'auth-preset.guard', default: 'web');
     }
 
     public static function webPrefix(): string
@@ -59,5 +42,18 @@ class AuthPreset
     public static function afterLoginRedirect(): string
     {
         return config(key: 'auth-preset.redirects.after_login', default: '/dashboard');
+    }
+
+    public static function afterRegistrationRedirect(): string
+    {
+        return config(key: 'auth-preset.redirects.after_registration', default: '/dashboard');
+    }
+
+    public static function view(string $page): string
+    {
+        return match (self::stack()) {
+            FrontendStack::Blade => 'auth-preset::blade.' . $page,
+            default              => throw new LogicException('The configured auth-preset stack is not installed.'),
+        };
     }
 }
