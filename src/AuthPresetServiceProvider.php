@@ -74,7 +74,7 @@ class AuthPresetServiceProvider extends ServiceProvider
     private function registerRoutes(): void
     {
         $this->app->booted(function (): void {
-            if (config('auth-preset.routes.mode', 'package') !== 'package') {
+            if (config(key: 'auth-preset.routes.mode', default: 'package') !== 'package') {
                 return;
             }
 
