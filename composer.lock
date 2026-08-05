@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fa3801d6f415ff1b0acc70cdfea177fb",
+    "content-hash": "1a7a5e86335df9f1934496f26adffa1d",
     "packages": [
         {
             "name": "brick/math",
@@ -1129,7 +1129,7 @@
             "dist": {
                 "type": "path",
                 "url": "../laranail-auth-kit",
-                "reference": "f2dd5ca0c66b390d44cf8f6a76bca7d2890ac748"
+                "reference": "07dd53cc458c6e19d1aa325fc12abe64c4753dc8"
             },
             "require": {
                 "laravel/framework": "^13.0",
@@ -1182,10 +1182,6 @@
                 ],
                 "test": [
                     "vendor/bin/pest --parallel"
-                ],
-                "post-autoload-dump": [
-                    "@clear",
-                    "@prepare"
                 ],
                 "lint": [
                     "@php vendor/bin/pint --ansi"
@@ -10607,10 +10603,8 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "stable",
-    "stability-flags": {
-        "laranail/auth-kit": 20
-    },
+    "minimum-stability": "dev",
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
