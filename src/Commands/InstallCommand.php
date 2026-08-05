@@ -6,10 +6,12 @@ namespace Simtabi\Laranail\AuthPreset\Commands;
 
 use Illuminate\Console\Command;
 
+use function Laravel\Prompts\select;
+
 class InstallCommand extends Command
 {
     protected $signature = 'auth-preset:install
-        {--stack=blade : The frontend stack to install (only blade is currently supported)}
+        {--stack= : The frontend stack to install}
         {--publish-routes : Publish package route files for application ownership}
         {--publish-controllers : Reserved for a future controller publishing workflow}
         {--publish-views : Publish Blade views for application ownership}
@@ -19,7 +21,13 @@ class InstallCommand extends Command
 
     public function handle(): int
     {
-        if ($this->option('stack') !== 'blade') {
+        $stack = $this->option('stack') ?? select(
+            label: 'Which frontend stack would you like to install?',
+            options: ['blade' => 'Blade'],
+            default: 'blade',
+        );
+
+        if ($stack !== 'blade') {
             $this->error('Only the [blade] stack is currently supported.');
 
             return self::FAILURE;
