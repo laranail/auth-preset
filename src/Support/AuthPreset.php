@@ -49,6 +49,11 @@ class AuthPreset
         return config(key: 'auth-preset.redirects.after_registration', default: '/dashboard');
     }
 
+    public static function afterLogoutRedirect(): string
+    {
+        return config(key: 'auth-preset.redirects.after_logout', default: '/');
+    }
+
     public static function view(string $page): string
     {
         return match (self::stack()) {

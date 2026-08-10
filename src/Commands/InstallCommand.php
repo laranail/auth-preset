@@ -10,7 +10,7 @@ use function Laravel\Prompts\select;
 
 class InstallCommand extends Command
 {
-    protected $signature = 'auth-preset:install
+    protected $signature = 'laranail:authkit.install
         {--stack= : The frontend stack to install}
         {--publish-routes : Publish package route files for application ownership}
         {--publish-controllers : Reserved for a future controller publishing workflow}

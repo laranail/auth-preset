@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Simtabi\Laranail\AuthPreset\Features;
 use Simtabi\Laranail\AuthPreset\Support\AuthPreset;
 use Simtabi\Laranail\AuthPreset\Http\Controllers\Auth\LoginController;
+use Simtabi\Laranail\AuthPreset\Http\Controllers\Auth\LogoutController;
 use Simtabi\Laranail\AuthPreset\Http\Controllers\Auth\RegisterController;
 
 Route::prefix(AuthPreset::webPrefix())
@@ -21,3 +22,11 @@ Route::prefix(AuthPreset::webPrefix())
             Route::post('/login', [LoginController::class, 'store'])->name('login.store');
         }
     });
+
+if (Features::enabled(Features::logout())) {
+    Route::prefix(AuthPreset::webPrefix())
+        ->middleware([...AuthPreset::webMiddleware(), 'auth:' . AuthPreset::guard()])
+        ->group(function (): void {
+            Route::post('/logout', [LogoutController::class, '__invoke'])->name('logout');
+        });
+}

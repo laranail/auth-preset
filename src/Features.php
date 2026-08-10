@@ -21,6 +21,11 @@ final class Features
         return 'registration';
     }
 
+    public static function logout(): string
+    {
+        return 'logout';
+    }
+
     public static function api(): string
     {
         return 'api';
