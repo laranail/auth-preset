@@ -54,6 +54,28 @@ class AuthPreset
         return config(key: 'auth-preset.redirects.after_logout', default: '/');
     }
 
+    public static function afterSocialLoginRedirect(): string
+    {
+        return config(key: 'auth-preset.redirects.after_social_login', default: '/dashboard');
+    }
+
+    /** @return array<int, string> */
+    public static function enabledSocialProviders(): array
+    {
+        $providers = config(key: 'auth-preset.social.providers', default: []);
+
+        if (! is_array($providers)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            array: $providers,
+            callback: function (string $provider): bool {
+                return (bool) config(key: "auth-kit.social.{$provider}.client_id");
+            },
+        ));
+    }
+
     public static function view(string $page): string
     {
         return match (self::stack()) {

@@ -8,6 +8,8 @@ use Simtabi\Laranail\AuthPreset\Support\AuthPreset;
 use Simtabi\Laranail\AuthPreset\Http\Controllers\Auth\LoginController;
 use Simtabi\Laranail\AuthPreset\Http\Controllers\Auth\LogoutController;
 use Simtabi\Laranail\AuthPreset\Http\Controllers\Auth\RegisterController;
+use Simtabi\Laranail\AuthPreset\Http\Controllers\Auth\SocialCallbackController;
+use Simtabi\Laranail\AuthPreset\Http\Controllers\Auth\SocialRedirectController;
 
 Route::prefix(AuthPreset::webPrefix())
     ->middleware([...AuthPreset::webMiddleware(), 'guest:' . AuthPreset::guard()])
@@ -20,6 +22,11 @@ Route::prefix(AuthPreset::webPrefix())
         if (Features::enabled(Features::login())) {
             Route::get('/login', [LoginController::class, 'create'])->name('login');
             Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+        }
+
+        if (Features::enabled(Features::social())) {
+            Route::get('/social/{provider}', SocialRedirectController::class)->name('social.redirect');
+            Route::get('/social/{provider}/callback', SocialCallbackController::class)->name('social.callback');
         }
     });
 
