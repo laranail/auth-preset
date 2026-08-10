@@ -28,6 +28,7 @@ return [
     'features' => [
         \Simtabi\Laranail\AuthPreset\Features::login(),
         \Simtabi\Laranail\AuthPreset\Features::registration(),
+        \Simtabi\Laranail\AuthPreset\Features::logout(),
         \Simtabi\Laranail\AuthPreset\Features::api(),
     ],
 
@@ -71,6 +72,7 @@ return [
     'redirects' => [
         'after_login'        => env(key: 'AUTH_PRESET_AFTER_LOGIN', default: '/dashboard'),
         'after_registration' => env(key: 'AUTH_PRESET_AFTER_REGISTRATION', default: '/dashboard'),
+        'after_logout'       => env(key: 'AUTH_PRESET_AFTER_LOGOUT', default: '/'),
     ],
 
 ];
