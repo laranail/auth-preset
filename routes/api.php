@@ -8,6 +8,8 @@ use Simtabi\Laranail\AuthPreset\Support\AuthPreset;
 use Simtabi\Laranail\AuthPreset\Http\Controllers\Api\LoginController;
 use Simtabi\Laranail\AuthPreset\Http\Controllers\Api\LogoutController;
 use Simtabi\Laranail\AuthPreset\Http\Controllers\Api\RegisterController;
+use Simtabi\Laranail\AuthPreset\Http\Controllers\Api\SocialCallbackController;
+use Simtabi\Laranail\AuthPreset\Http\Controllers\Api\SocialRedirectController;
 
 if (Features::enabled(Features::api())) {
     Route::prefix(AuthPreset::apiPrefix())
@@ -19,6 +21,11 @@ if (Features::enabled(Features::api())) {
 
             if (Features::enabled(Features::login())) {
                 Route::post('/login', [LoginController::class, 'store'])->name('api.login');
+            }
+
+            if (Features::enabled(Features::social())) {
+                Route::get('/social/{provider}', [SocialRedirectController::class, '__invoke'])->name('api.social.redirect');
+                Route::get('/social/{provider}/callback', [SocialCallbackController::class, '__invoke'])->name('api.social.callback');
             }
         });
 

@@ -26,6 +26,11 @@ final class Features
         return 'logout';
     }
 
+    public static function social(): string
+    {
+        return 'social';
+    }
+
     public static function api(): string
     {
         return 'api';

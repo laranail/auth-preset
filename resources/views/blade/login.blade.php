@@ -2,16 +2,18 @@
     <div class="text-center mb-8">
         <h2 class="text-2xl font-bold tracking-tight text-gray-900">Sign in to your account</h2>
         <p class="mt-2 text-sm text-gray-600">
-            Or
             @if (\Simtabi\Laranail\AuthPreset\Features::enabled(\Simtabi\Laranail\AuthPreset\Features::registration()))
+                Don't have account?
                 <a href="{{ route('register') }}" class="font-semibold text-indigo-600 hover:text-indigo-500">
-                    create a new account
+                    register.
                 </a>
             @endif
         </p>
     </div>
 
     <x-auth-preset::validation-errors :errors="$errors" />
+
+    <x-auth-preset::social-buttons />
 
     <form method="POST" action="{{ route('login') }}" class="space-y-6">
         @csrf
