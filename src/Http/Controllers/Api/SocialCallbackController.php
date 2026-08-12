@@ -13,14 +13,22 @@ use Simtabi\Laranail\Auth\Models\Social;
 use Simtabi\Laranail\Auth\Support\AuthResult;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Simtabi\Laranail\Auth\Enums\SocialProvider;
+use Simtabi\Laranail\AuthPreset\Support\AuthPreset;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
+use Simtabi\Laranail\Auth\Dtos\IssueTokenForUserInput;
+use Simtabi\Laranail\Auth\Contracts\IssueTokenForUserInterface;
 use Simtabi\Laranail\Auth\Http\Controllers\AbstractSocialCallbackController;
 
 class SocialCallbackController extends AbstractSocialCallbackController
 {
+    public function __construct(
+        private IssueTokenForUserInterface $issuer,
+    ) {
+    }
+
     protected function guard(): string
     {
-        return \Simtabi\Laranail\AuthPreset\Support\AuthPreset::guard();
+        return AuthPreset::guard();
     }
 
     protected function resolve(SocialProvider $provider): Closure
@@ -105,17 +113,22 @@ class SocialCallbackController extends AbstractSocialCallbackController
 
     protected function passed(Request $request, AuthResult $result): JsonResponse
     {
-        return response()->json(data: [
-            'status' => 'passed',
-            'user'   => $result->user,
+        $tokenResult = $this->issuer->execute(new IssueTokenForUserInput(
+            user: $result->user,
+            name: 'api-social',
+        ));
+
+        return response()->json([
+            'token' => $tokenResult->token,
+            'user'  => $tokenResult->user,
         ]);
     }
 
     protected function failed(Request $request, AuthResult $result): JsonResponse
     {
-        return response()->json(data: [
+        return response()->json([
             'status'  => 'failed',
             'message' => 'Social authentication failed.',
-        ], status: 422);
+        ], 422);
     }
 }

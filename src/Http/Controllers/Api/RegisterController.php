@@ -8,13 +8,14 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Simtabi\Laranail\AuthPreset\Support\AuthPreset;
-use Simtabi\Laranail\Auth\Contracts\LoginUserInterface;
+use Simtabi\Laranail\Auth\Dtos\IssueTokenForUserInput;
+use Simtabi\Laranail\Auth\Contracts\IssueTokenForUserInterface;
 use Simtabi\Laranail\Auth\Http\Controllers\AbstractRegisterController;
 
 class RegisterController extends AbstractRegisterController
 {
     public function __construct(
-        private LoginUserInterface $login,
+        private IssueTokenForUserInterface $issuer,
     ) {
     }
 
@@ -25,11 +26,14 @@ class RegisterController extends AbstractRegisterController
 
     protected function registered(Request $request, Authenticatable $user): JsonResponse
     {
-        $this->login->execute($user, $this->guard());
+        $tokenResult = $this->issuer->execute(new IssueTokenForUserInput(
+            user: $user,
+            name: 'api-register',
+        ));
 
         return response()->json([
-            'status' => 'registered',
-            'user'   => $user,
+            'token' => $tokenResult->token,
+            'user'  => $tokenResult->user,
         ], 201);
     }
 }

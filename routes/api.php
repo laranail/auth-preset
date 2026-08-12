@@ -13,7 +13,7 @@ use Simtabi\Laranail\AuthPreset\Http\Controllers\Api\SocialRedirectController;
 
 if (Features::enabled(Features::api())) {
     Route::prefix(AuthPreset::apiPrefix())
-        ->middleware([...AuthPreset::apiMiddleware(), 'guest:' . AuthPreset::guard()])
+        ->middleware(AuthPreset::apiMiddleware())
         ->group(function (): void {
             if (Features::enabled(Features::registration())) {
                 Route::post('/register', [RegisterController::class, 'store'])->name('api.register');
@@ -27,13 +27,11 @@ if (Features::enabled(Features::api())) {
                 Route::get('/social/{provider}', [SocialRedirectController::class, '__invoke'])->name('api.social.redirect');
                 Route::get('/social/{provider}/callback', [SocialCallbackController::class, '__invoke'])->name('api.social.callback');
             }
-        });
 
-    if (Features::enabled(Features::logout())) {
-        Route::prefix(AuthPreset::apiPrefix())
-            ->middleware([...AuthPreset::apiMiddleware(), 'auth:' . AuthPreset::guard()])
-            ->group(function (): void {
-                Route::post('/logout', [LogoutController::class, '__invoke'])->name('api.logout');
-            });
-    }
+            if (Features::enabled(Features::logout())) {
+                Route::post('/logout', [LogoutController::class, '__invoke'])
+                    ->middleware('auth:sanctum')
+                    ->name('api.logout');
+            }
+        });
 }

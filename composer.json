@@ -20,17 +20,14 @@
     ],
     "repositories": [
         {
-            "type": "path",
-            "url": "../laranail-auth-kit",
-            "options": {
-                "symlink": true
-            }
+            "type": "vcs",
+            "url": "https://github.com/laranail/auth-kit.git"
         }
     ],
     "require": {
         "php": "^8.4 | ^8.5",
         "laravel/framework": "^13.0",
-        "laranail/auth-kit": "*"
+        "laranail/auth-kit": "dev-main"
     },
     "require-dev": {
         "pestphp/pest": "^4.0",
