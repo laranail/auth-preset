@@ -29,7 +29,6 @@ return [
         \Simtabi\Laranail\AuthPreset\Features::login(),
         \Simtabi\Laranail\AuthPreset\Features::registration(),
         \Simtabi\Laranail\AuthPreset\Features::logout(),
-        \Simtabi\Laranail\AuthPreset\Features::api(),
     ],
 
     'routes' => [

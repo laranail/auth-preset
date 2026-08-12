@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 
 use function Laravel\Prompts\select;
+use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\multiselect;
 
 class InstallCommand extends Command
@@ -22,6 +23,7 @@ class InstallCommand extends Command
     protected $signature = 'laranail:authkit.install
         {--stack= : The frontend stack to install}
         {--social=* : Social providers to enable (google, facebook, twitter, linkedin, paypal)}
+        {--api : Enable API authentication with Sanctum tokens}
         {--publish-routes : Publish package route files for application ownership}
         {--publish-controllers : Reserved for a future controller publishing workflow}
         {--publish-views : Publish Blade views for application ownership}
@@ -44,6 +46,7 @@ class InstallCommand extends Command
         }
 
         $socialProviders = $this->resolveSocialProviders();
+        $wantsApi = $this->resolveApiPreference();
 
         $this->publish(tag: 'auth-kit-config');
         $this->publish(tag: 'auth-preset-config');
@@ -52,6 +55,12 @@ class InstallCommand extends Command
             $this->publish(tag: 'auth-kit-social-migrations');
             $this->newLine();
             $this->info('Social login migration published. Run `php artisan migrate` to create the socials table.');
+        }
+
+        if ($wantsApi) {
+            $this->publish(tag: 'sanctum-migrations');
+            $this->newLine();
+            $this->info('Sanctum token migration published. Run `php artisan migrate` to create the personal_access_tokens table.');
         }
 
         if ($this->option('publish-routes')) {
@@ -66,10 +75,14 @@ class InstallCommand extends Command
             $this->warn('Controller publishing is not needed yet: extend the package controllers or use auth-kit contracts in your application controller.');
         }
 
-        $this->configureFeatures($socialProviders);
+        $this->configureFeatures($socialProviders, $wantsApi);
 
-        $this->info('auth-preset is ready. Package routes, including enabled API routes, are registered automatically.');
+        $this->info('auth-preset is ready. Package routes are registered automatically.');
         $this->line('Visit /auth/register or /auth/login. Review config/auth-preset.php to enable or disable features.');
+
+        if ($wantsApi) {
+            $this->line('API routes are enabled at /api/auth. Use Sanctum tokens for authentication.');
+        }
 
         if (count($socialProviders) > 0) {
             $this->newLine();
@@ -103,10 +116,27 @@ class InstallCommand extends Command
         );
     }
 
-    /** @param array<int, string> $providers */
-    private function configureFeatures(array $providers): void
+    private function resolveApiPreference(): bool
     {
-        if (count($providers) === 0) {
+        if ($this->option('api') !== null) {
+            return (bool) $this->option('api');
+        }
+
+        if (! $this->input->isInteractive()) {
+            return false;
+        }
+
+        return confirm(
+            label: 'Would you like to enable API authentication with Sanctum tokens?',
+            default: false,
+            hint: 'Publishes the personal_access_tokens migration and enables API routes.',
+        );
+    }
+
+    /** @param array<int, string> $providers */
+    private function configureFeatures(array $providers, bool $wantsApi): void
+    {
+        if (count($providers) === 0 && ! $wantsApi) {
             return;
         }
 
@@ -118,9 +148,14 @@ class InstallCommand extends Command
 
         $contents = file_get_contents($configPath);
 
-        if (! str_contains($contents, 'Features::social()')) {
+        if (count($providers) > 0 && ! str_contains($contents, 'Features::social()')) {
             $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::login\(\),)/";
             $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::social(),", $contents, limit: 1);
+        }
+
+        if ($wantsApi && ! str_contains($contents, 'Features::api()')) {
+            $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::logout\(\),)/";
+            $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::api(),", $contents, limit: 1);
         }
 
         if (count($providers) > 0) {
