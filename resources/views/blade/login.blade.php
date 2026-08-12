@@ -63,6 +63,12 @@
                 >
                 <label for="remember" class="ml-3 block text-sm text-gray-700">Remember me</label>
             </div>
+
+            @if (\Simtabi\Laranail\AuthPreset\Features::enabled(\Simtabi\Laranail\AuthPreset\Features::passwordReset()))
+                <a href="{{ route('password.request') }}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-500">
+                    Forgot password?
+                </a>
+            @endif
         </div>
 
         <div>

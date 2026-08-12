@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\AuthPreset;
 
+use Illuminate\Http\Request;
+use Laravel\Fortify\Fortify;
 use Illuminate\Support\ServiceProvider;
 use Simtabi\Laranail\AuthPreset\Commands\InstallCommand;
 
@@ -19,7 +21,32 @@ class AuthPresetServiceProvider extends ServiceProvider
         $this->registerPublishes();
         $this->registerCommands();
         $this->loadViews();
+        $this->registerFortifyViews();
         $this->loadRoutes();
+    }
+
+    private function registerFortifyViews(): void
+    {
+        if (! Features::enabled(Features::login())) {
+            return;
+        }
+
+        Fortify::loginView(fn () => view(Support\AuthPreset::view('login')));
+
+        if (Features::enabled(Features::registration())) {
+            Fortify::registerView(fn () => view(Support\AuthPreset::view('register')));
+        }
+
+        if (Features::enabled(Features::passwordReset())) {
+            Fortify::requestPasswordResetLinkView(fn () => view(Support\AuthPreset::view('forgot-password')));
+            Fortify::resetPasswordView(fn (Request $request) => view(Support\AuthPreset::view('reset-password'), [
+                'request' => $request,
+            ]));
+        }
+
+        if (Features::enabled(Features::emailVerification())) {
+            Fortify::verifyEmailView(fn () => view(Support\AuthPreset::view('verify-email')));
+        }
     }
 
     private function registerPublishes(): void
