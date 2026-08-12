@@ -43,6 +43,8 @@ abstract class TestCase extends OrchestraTestCase
             Features::logout(),
             Features::social(),
             Features::api(),
+            Features::passwordReset(),
+            Features::emailVerification(),
         ]);
     }
 
