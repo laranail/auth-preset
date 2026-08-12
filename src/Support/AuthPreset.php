@@ -31,12 +31,12 @@ class AuthPreset
 
     public static function webMiddleware(): array
     {
-        return config(key: 'auth-preset.middleware.web', default: ['web', 'guest']);
+        return config(key: 'auth-preset.middleware.web', default: ['web']);
     }
 
     public static function apiMiddleware(): array
     {
-        return config(key: 'auth-preset.middleware.api', default: ['api', 'guest', 'throttle:60,1']);
+        return config(key: 'auth-preset.middleware.api', default: ['api', 'throttle:60,1']);
     }
 
     public static function afterLoginRedirect(): string

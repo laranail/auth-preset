@@ -51,6 +51,6 @@ abstract class TestCase extends OrchestraTestCase
         $this->loadMigrationsFrom(dirname(__DIR__) . '/vendor/orchestra/testbench-core/laravel/migrations');
         $this->loadMigrationsFrom(dirname(__DIR__) . '/vendor/laravel/fortify/database/migrations');
         $this->loadMigrationsFrom(dirname(__DIR__) . '/vendor/laravel/sanctum/database/migrations');
-        $this->loadMigrationsFrom(dirname(__DIR__) . '/../laranail-auth-kit/database/migrations/social');
+        $this->loadMigrationsFrom(dirname(__DIR__) . '/vendor/laranail/auth-kit/database/migrations/social');
     }
 }
