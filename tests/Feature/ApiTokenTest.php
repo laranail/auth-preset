@@ -2,17 +2,20 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Str;
 use Workbench\App\Models\User;
 
 it('returns a token on API login', function (): void {
+    $password = Str::random(16);
+
     User::factory()->create([
         'email'    => 'ada@example.com',
-        'password' => bcrypt('secret'),
+        'password' => bcrypt($password),
     ]);
 
     $response = $this->postJson(route('api.login'), [
         'email'    => 'ada@example.com',
-        'password' => 'secret',
+        'password' => $password,
     ]);
 
     $response->assertOk()
@@ -22,12 +25,12 @@ it('returns a token on API login', function (): void {
 it('returns 422 on API login with wrong credentials', function (): void {
     User::factory()->create([
         'email'    => 'ada@example.com',
-        'password' => bcrypt('secret'),
+        'password' => bcrypt('correct-password'),
     ]);
 
     $response = $this->postJson(route('api.login'), [
         'email'    => 'ada@example.com',
-        'password' => 'wrong',
+        'password' => 'wrong-password',
     ]);
 
     $response->assertStatus(422)
@@ -35,11 +38,13 @@ it('returns 422 on API login with wrong credentials', function (): void {
 });
 
 it('returns a token on API registration', function (): void {
+    $password = Str::password(12);
+
     $response = $this->postJson(route('api.register'), [
         'name'                  => 'Ada Lovelace',
         'email'                 => 'ada@example.com',
-        'password'              => 'SecureP@ss1',
-        'password_confirmation' => 'SecureP@ss1',
+        'password'              => $password,
+        'password_confirmation' => $password,
     ]);
 
     $response->assertStatus(201)

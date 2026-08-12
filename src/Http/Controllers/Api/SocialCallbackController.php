@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Simtabi\Laranail\Auth\Support\AuthResult;
 use Simtabi\Laranail\AuthPreset\Support\AuthPreset;
-use Simtabi\Laranail\Auth\Dtos\IssueTokenForUserInput;
 use Simtabi\Laranail\Auth\Contracts\IssueTokenForUserInterface;
 use Simtabi\Laranail\Auth\Http\Controllers\AbstractSocialCallbackController;
 
@@ -26,10 +25,10 @@ class SocialCallbackController extends AbstractSocialCallbackController
 
     protected function passed(Request $request, AuthResult $result): JsonResponse
     {
-        $tokenResult = $this->issuer->execute(new IssueTokenForUserInput(
+        $tokenResult = $this->issuer->execute(
             user: $result->user,
             name: 'api-social',
-        ));
+        );
 
         return response()->json([
             'token' => $tokenResult->token,
