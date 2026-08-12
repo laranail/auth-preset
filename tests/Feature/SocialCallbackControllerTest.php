@@ -70,3 +70,30 @@ it('redirects to login on failed social login', function (): void {
 
     $response->assertRedirect(route('login'));
 });
+
+it('does not auto-link by email when provider has not verified it (B1 regression)', function (): void {
+    $existingUser = User::factory()->create(['email' => 'amos@simtabi.com']);
+
+    $unverifiedUser = new SocialiteUser();
+    $raw = [
+        'id'             => '112837291294199545470',
+        'name'           => 'Attacker',
+        'nickname'       => 'attacker',
+        'email'          => 'amos@simtabi.com',
+        'avatar'         => 'https://example.com/avatar.jpg',
+        'email_verified' => false,
+    ];
+    $unverifiedUser->setRaw($raw);
+    $unverifiedUser->map($raw);
+    $unverifiedUser->token = 'mock-token';
+    $unverifiedUser->refreshToken = 'mock-refresh';
+    $unverifiedUser->expiresIn = 3600;
+
+    Socialite::fake(SocialProvider::GOOGLE->value, $unverifiedUser);
+
+    $response = $this->get(route('social.callback', ['provider' => 'google']));
+
+    $response->assertRedirect(route('login'));
+    expect(auth()->check())->toBeFalse()
+        ->and(auth()->id())->not->toBe($existingUser->id);
+});
