@@ -35,4 +35,14 @@ final class Features
     {
         return 'api';
     }
+
+    public static function passwordReset(): string
+    {
+        return 'password-reset';
+    }
+
+    public static function emailVerification(): string
+    {
+        return 'email-verification';
+    }
 }

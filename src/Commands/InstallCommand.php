@@ -24,6 +24,8 @@ class InstallCommand extends Command
         {--stack= : The frontend stack to install}
         {--social=* : Social providers to enable (google, facebook, twitter, linkedin, paypal)}
         {--api : Enable API authentication with Sanctum tokens}
+        {--password-reset : Enable password reset flow}
+        {--email-verification : Enable email verification flow}
         {--publish-routes : Publish package route files for application ownership}
         {--publish-controllers : Reserved for a future controller publishing workflow}
         {--publish-views : Publish Blade views for application ownership}
@@ -47,6 +49,8 @@ class InstallCommand extends Command
 
         $socialProviders = $this->resolveSocialProviders();
         $wantsApi = $this->resolveApiPreference();
+        $wantsPasswordReset = $this->resolvePasswordReset();
+        $wantsEmailVerification = $this->resolveEmailVerification();
 
         $this->publish(tag: 'auth-kit-config');
         $this->publish(tag: 'auth-preset-config');
@@ -75,7 +79,7 @@ class InstallCommand extends Command
             $this->warn('Controller publishing is not needed yet: extend the package controllers or use auth-kit contracts in your application controller.');
         }
 
-        $this->configureFeatures($socialProviders, $wantsApi);
+        $this->configureFeatures($socialProviders, $wantsApi, $wantsPasswordReset, $wantsEmailVerification);
 
         $this->info('auth-preset is ready. Package routes are registered automatically.');
         $this->line('Visit /auth/register or /auth/login. Review config/auth-preset.php to enable or disable features.');
@@ -133,10 +137,44 @@ class InstallCommand extends Command
         );
     }
 
-    /** @param array<int, string> $providers */
-    private function configureFeatures(array $providers, bool $wantsApi): void
+    private function resolvePasswordReset(): bool
     {
-        if (count($providers) === 0 && ! $wantsApi) {
+        if ($this->option('password-reset') !== null) {
+            return (bool) $this->option('password-reset');
+        }
+
+        if (! $this->input->isInteractive()) {
+            return false;
+        }
+
+        return confirm(
+            label: 'Would you like to enable password reset?',
+            default: true,
+            hint: 'Adds forgot-password and reset-password views and routes via Fortify.',
+        );
+    }
+
+    private function resolveEmailVerification(): bool
+    {
+        if ($this->option('email-verification') !== null) {
+            return (bool) $this->option('email-verification');
+        }
+
+        if (! $this->input->isInteractive()) {
+            return false;
+        }
+
+        return confirm(
+            label: 'Would you like to enable email verification?',
+            default: true,
+            hint: 'Sends a verification email after registration via Fortify.',
+        );
+    }
+
+    /** @param array<int, string> $providers */
+    private function configureFeatures(array $providers, bool $wantsApi, bool $wantsPasswordReset, bool $wantsEmailVerification): void
+    {
+        if (count($providers) === 0 && ! $wantsApi && ! $wantsPasswordReset && ! $wantsEmailVerification) {
             return;
         }
 
@@ -151,6 +189,16 @@ class InstallCommand extends Command
         if (count($providers) > 0 && ! str_contains($contents, 'Features::social()')) {
             $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::login\(\),)/";
             $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::social(),", $contents, limit: 1);
+        }
+
+        if ($wantsPasswordReset && ! str_contains($contents, 'Features::passwordReset()')) {
+            $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::logout\(\),)/";
+            $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::passwordReset(),", $contents, limit: 1);
+        }
+
+        if ($wantsEmailVerification && ! str_contains($contents, 'Features::emailVerification()')) {
+            $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::logout\(\),)/";
+            $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::emailVerification(),", $contents, limit: 1);
         }
 
         if ($wantsApi && ! str_contains($contents, 'Features::api()')) {
