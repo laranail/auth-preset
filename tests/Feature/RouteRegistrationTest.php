@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 
-it('registers login, registration, and API routes by default', function (): void {
+it('registers login, registration, and API routes when features are enabled', function (): void {
     $routes = Route::getRoutes()->getRoutesByName();
 
     expect($routes)->toHaveKey('login')
