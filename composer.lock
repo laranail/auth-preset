@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "64e5bc96d569e855dc3d2b3607b36024",
+    "content-hash": "1a7a5e86335df9f1934496f26adffa1d",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1279,16 +1279,10 @@
         {
             "name": "laranail/auth-kit",
             "version": "dev-main",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laranail/auth-kit.git",
-                "reference": "3c60da72d431e6b7d2bf4365f82f91a3ca17ddcb"
-            },
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/laranail/auth-kit/zipball/3c60da72d431e6b7d2bf4365f82f91a3ca17ddcb",
-                "reference": "3c60da72d431e6b7d2bf4365f82f91a3ca17ddcb",
-                "shasum": ""
+                "type": "path",
+                "url": "../laranail-auth-kit",
+                "reference": "916af2d73605d7df0ace694fe7fa8a756aec7744"
             },
             "require": {
                 "laravel/fortify": "^1.38",
@@ -1304,7 +1298,6 @@
                 "pestphp/pest": "^4.0",
                 "pestphp/pest-plugin-laravel": "^4.0"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -1365,11 +1358,10 @@
                 "laravel",
                 "scaffolding"
             ],
-            "support": {
-                "source": "https://github.com/laranail/auth-kit/tree/main",
-                "issues": "https://github.com/laranail/auth-kit/issues"
-            },
-            "time": "2026-08-12T08:01:40+00:00"
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "laravel/fortify",
@@ -11651,9 +11643,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "laranail/auth-kit": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

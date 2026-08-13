@@ -11,13 +11,4 @@ use Simtabi\Laranail\Auth\Http\Controllers\AbstractLogoutController;
 
 class LogoutController extends AbstractLogoutController
 {
-    protected function guard(): string
-    {
-        return AuthPreset::guard();
-    }
-
-    protected function loggedOut(Request $request): RedirectResponse
-    {
-        return redirect()->to(path: AuthPreset::afterLogoutRedirect());
-    }
 }

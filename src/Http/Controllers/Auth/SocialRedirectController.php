@@ -11,13 +11,4 @@ use Simtabi\Laranail\Auth\Http\Controllers\AbstractSocialRedirectController;
 
 class SocialRedirectController extends AbstractSocialRedirectController
 {
-    protected function guard(): string
-    {
-        return AuthPreset::guard();
-    }
-
-    protected function redirect(Request $request, string $url): RedirectResponse
-    {
-        return redirect()->to(path: $url);
-    }
 }
