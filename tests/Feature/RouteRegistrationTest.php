@@ -5,39 +5,39 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Simtabi\Laranail\AuthPreset\Features;
 
-it('registers login, registration, and API routes when features are enabled', function (): void {
+it(description: 'registers login, registration, and API routes when features are enabled', closure: function (): void {
     $routes = Route::getRoutes()->getRoutesByName();
 
-    expect($routes)->toHaveKey('login')
-        ->and($routes)->toHaveKey('login.store')
-        ->and($routes)->toHaveKey('register')
-        ->and($routes)->toHaveKey('register.store')
-        ->and($routes)->toHaveKey('api.login')
-        ->and($routes)->toHaveKey('api.register');
+    expect(value: $routes)->toHaveKey(key: 'login')
+        ->and(value: $routes)->toHaveKey(key: 'login.store')
+        ->and(value: $routes)->toHaveKey(key: 'register')
+        ->and(value: $routes)->toHaveKey(key: 'register.store')
+        ->and(value: $routes)->toHaveKey(key: 'api.login')
+        ->and(value: $routes)->toHaveKey(key: 'api.register');
 });
 
-it('registers Fortify password reset routes when feature is enabled', function (): void {
-    config()->set('auth-preset.features', array_merge(
-        config('auth-preset.features'),
+it(description: 'registers Fortify password reset routes when feature is enabled', closure: function (): void {
+    config()->set(key: 'auth-preset.features', value: array_merge(
+        config(key: 'auth-preset.features'),
         [Features::passwordReset()]
     ));
 
     $routes = Route::getRoutes()->getRoutesByName();
 
-    expect($routes)->toHaveKey('password.request')
-        ->and($routes)->toHaveKey('password.email')
-        ->and($routes)->toHaveKey('password.reset');
+    expect(value: $routes)->toHaveKey(key: 'password.request')
+        ->and(value: $routes)->toHaveKey(key: 'password.email')
+        ->and(value: $routes)->toHaveKey(key: 'password.reset');
 });
 
-it('registers Fortify email verification routes when feature is enabled', function (): void {
-    config()->set('auth-preset.features', array_merge(
-        config('auth-preset.features'),
+it(description: 'registers Fortify email verification routes when feature is enabled', closure: function (): void {
+    config()->set(key: 'auth-preset.features', value: array_merge(
+        config(key: 'auth-preset.features'),
         [Features::emailVerification()]
     ));
 
     $routes = Route::getRoutes()->getRoutesByName();
 
-    expect($routes)->toHaveKey('verification.notice')
-        ->and($routes)->toHaveKey('verification.verify')
-        ->and($routes)->toHaveKey('verification.send');
+    expect(value: $routes)->toHaveKey(key: 'verification.notice')
+        ->and(value: $routes)->toHaveKey(key: 'verification.verify')
+        ->and(value: $routes)->toHaveKey(key: 'verification.send');
 });

@@ -8,13 +8,13 @@ use Simtabi\Laranail\Auth\Models\Social;
 use Simtabi\Laranail\Auth\Enums\SocialProvider;
 use Laravel\Socialite\Two\User as SocialiteUser;
 
-beforeEach(function (): void {
+beforeEach(closure: function (): void {
     $this->socialiteUser = new SocialiteUser();
-    $this->socialiteUser->map([
+    $this->socialiteUser->map(attributes: [
         'id'             => '112837291294199545470',
         'name'           => 'Amos Njogu',
         'nickname'       => 'amosnjogu',
-        'email'          => 'amos@simtabi.com',
+        'email'          => 'amos@example.com',
         'avatar'         => 'https://example.com/avatar.jpg',
         'email_verified' => true,
     ]);
@@ -23,40 +23,40 @@ beforeEach(function (): void {
     $this->socialiteUser->expiresIn = 3600;
 });
 
-it('redirects to dashboard on successful social login', function (): void {
-    Socialite::fake(SocialProvider::GOOGLE->value, $this->socialiteUser);
+it(description: 'redirects to dashboard on successful social login', closure: function (): void {
+    Socialite::fake(driver: SocialProvider::GOOGLE->value, user: $this->socialiteUser);
 
-    $response = $this->get(route('social.callback', ['provider' => 'google']));
+    $response = $this->get(uri: route(name: 'social.callback', parameters: ['provider' => 'google']));
 
     $response->assertRedirect();
-    expect(auth()->check())->toBeTrue()
-        ->and(auth()->user()->email)->toBe('amos@simtabi.com');
+    expect(value: auth()->check())->toBeTrue()
+        ->and(value: auth()->user()->email)->toBe(expected: 'amos@example.com');
 });
 
-it('returns existing user when social account already exists', function (): void {
-    Socialite::fake(SocialProvider::GOOGLE->value, $this->socialiteUser);
+it(description: 'returns existing user when social account already exists', closure: function (): void {
+    Socialite::fake(driver: SocialProvider::GOOGLE->value, user: $this->socialiteUser);
 
-    $existingUser = User::factory()->create(['email' => 'amos@simtabi.com']);
+    $existingUser = User::factory()->create(attributes: ['email' => 'amos@example.com']);
     Social::create([
         'socialable_type' => User::class,
         'socialable_id'   => $existingUser->id,
         'provider'        => 'google',
         'provider_id'     => '112837291294199545470',
         'name'            => 'Amos Njogu',
-        'email'           => 'amos@simtabi.com',
+        'email'           => 'amos@example.com',
         'token'           => 'old-token',
         'refresh_token'   => 'old-refresh-token',
     ]);
 
-    $response = $this->get(route('social.callback', ['provider' => 'google']));
+    $response = $this->get(uri: route(name: 'social.callback', parameters: ['provider' => 'google']));
 
     $response->assertRedirect();
-    expect(auth()->id())->toBe($existingUser->id);
+    expect(value: auth()->id())->toBe(expected: $existingUser->id);
 });
 
-it('redirects to login on failed social login', function (): void {
+it(description: 'redirects to login on failed social login', closure: function (): void {
     $noEmailUser = new SocialiteUser();
-    $noEmailUser->map([
+    $noEmailUser->map(attributes: [
         'id'       => '112837291294199545470',
         'name'     => 'No Email',
         'nickname' => 'noemail',
@@ -64,36 +64,36 @@ it('redirects to login on failed social login', function (): void {
     $noEmailUser->token = 'mock-token';
     $noEmailUser->refreshToken = 'mock-refresh';
 
-    Socialite::fake(SocialProvider::GOOGLE->value, $noEmailUser);
+    Socialite::fake(driver: SocialProvider::GOOGLE->value, user: $noEmailUser);
 
-    $response = $this->get(route('social.callback', ['provider' => 'google']));
+    $response = $this->get(uri: route(name: 'social.callback', parameters: ['provider' => 'google']));
 
-    $response->assertRedirect(route('login'));
+    $response->assertRedirect(uri: route(name: 'login'));
 });
 
-it('does not auto-link by email when provider has not verified it (B1 regression)', function (): void {
-    $existingUser = User::factory()->create(['email' => 'amos@simtabi.com']);
+it(description: 'does not auto-link by email when provider has not verified it (B1 regression)', closure: function (): void {
+    $existingUser = User::factory()->create(attributes: ['email' => 'amos@example.com']);
 
     $unverifiedUser = new SocialiteUser();
     $raw = [
         'id'             => '112837291294199545470',
         'name'           => 'Attacker',
         'nickname'       => 'attacker',
-        'email'          => 'amos@simtabi.com',
+        'email'          => 'amos@example.com',
         'avatar'         => 'https://example.com/avatar.jpg',
         'email_verified' => false,
     ];
-    $unverifiedUser->setRaw($raw);
-    $unverifiedUser->map($raw);
+    $unverifiedUser->setRaw(user: $raw);
+    $unverifiedUser->map(attributes: $raw);
     $unverifiedUser->token = 'mock-token';
     $unverifiedUser->refreshToken = 'mock-refresh';
     $unverifiedUser->expiresIn = 3600;
 
-    Socialite::fake(SocialProvider::GOOGLE->value, $unverifiedUser);
+    Socialite::fake(driver: SocialProvider::GOOGLE->value, user: $unverifiedUser);
 
-    $response = $this->get(route('social.callback', ['provider' => 'google']));
+    $response = $this->get(uri: route(name: 'social.callback', parameters: ['provider' => 'google']));
 
-    $response->assertRedirect(route('login'));
-    expect(auth()->check())->toBeFalse()
-        ->and(auth()->id())->not->toBe($existingUser->id);
+    $response->assertRedirect(uri: route(name: 'login'));
+    expect(value: auth()->check())->toBeFalse()
+        ->and(value: auth()->id())->not->toBe(expected: $existingUser->id);
 });
