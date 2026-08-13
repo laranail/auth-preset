@@ -41,6 +41,11 @@ final class Features
         return 'password-reset';
     }
 
+    public static function updateProfileInformation(): string
+    {
+        return 'update-profile-information';
+    }
+
     public static function updatePasswords(): string
     {
         return 'update-passwords';

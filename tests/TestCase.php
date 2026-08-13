@@ -44,6 +44,7 @@ abstract class TestCase extends OrchestraTestCase
             Features::social(),
             Features::api(),
             Features::passwordReset(),
+            Features::updateProfileInformation(),
             Features::updatePasswords(),
             Features::emailVerification(),
         ]);
