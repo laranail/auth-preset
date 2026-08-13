@@ -5,61 +5,65 @@ declare(strict_types=1);
 use Illuminate\Support\Str;
 use Workbench\App\Models\User;
 
-it('returns a token on API login', function (): void {
-    $password = Str::random(16);
+it(description: 'returns a token on API login', closure: function (): void {
+    $password = Str::random(length: 16);
 
-    User::factory()->create([
+    User::factory()->create(attributes: [
         'email'    => 'ada@example.com',
-        'password' => bcrypt($password),
+        'password' => bcrypt(value: $password),
     ]);
 
-    $response = $this->postJson(route('api.login'), [
+    $response = $this->postJson(uri: route(name: 'api.login'), data: [
         'email'    => 'ada@example.com',
         'password' => $password,
     ]);
 
     $response->assertOk()
-        ->assertJsonStructure(['token', 'user']);
+        ->assertJsonPath(path: 'status', expect: 'success')
+        ->assertJsonStructure(structure: ['status', 'data' => ['token', 'user']]);
 });
 
-it('returns 422 on API login with wrong credentials', function (): void {
-    User::factory()->create([
+it(description: 'returns 422 on API login with wrong credentials', closure: function (): void {
+    User::factory()->create(attributes: [
         'email'    => 'ada@example.com',
-        'password' => bcrypt('correct-password'),
+        'password' => bcrypt(value: 'correct-password'),
     ]);
 
-    $response = $this->postJson(route('api.login'), [
+    $response = $this->postJson(uri: route(name: 'api.login'), data: [
         'email'    => 'ada@example.com',
         'password' => 'wrong-password',
     ]);
 
-    $response->assertStatus(422)
-        ->assertJsonPath('status', 'failed');
+    $response->assertStatus(status: 422)
+        ->assertJsonPath(path: 'status', expect: 'failed')
+        ->assertJsonPath(path: 'data.message', expect: 'Invalid credentials.');
 });
 
-it('returns a token on API registration', function (): void {
-    $password = Str::password(12);
+it(description: 'returns a token on API registration', closure: function (): void {
+    $password = Str::password(length: 12);
 
-    $response = $this->postJson(route('api.register'), [
+    $response = $this->postJson(uri: route(name: 'api.register'), data: [
         'name'                  => 'Ada Lovelace',
         'email'                 => 'ada@example.com',
         'password'              => $password,
         'password_confirmation' => $password,
     ]);
 
-    $response->assertStatus(201)
-        ->assertJsonStructure(['token', 'user']);
+    $response->assertStatus(status: 201)
+        ->assertJsonPath(path: 'status', expect: 'success')
+        ->assertJsonStructure(structure: ['status', 'data' => ['token', 'user']]);
 });
 
-it('revokes the token on API logout', function (): void {
+it(description: 'revokes the token on API logout', closure: function (): void {
     $user = User::factory()->create();
     $token = $user->createToken('test-token');
 
-    $response = $this->withToken($token->plainTextToken)
-        ->postJson(route('api.logout'));
+    $response = $this->withToken(token: $token->plainTextToken)
+        ->postJson(uri: route(name: 'api.logout'));
 
     $response->assertOk()
-        ->assertJsonPath('status', 'logged_out');
+        ->assertJsonPath(path: 'status', expect: 'success')
+        ->assertJsonPath(path: 'data.message', expect: 'Logged out successfully.');
 
-    expect($user->fresh()->tokens)->toHaveCount(0);
+    expect(value: $user->fresh()->tokens)->toHaveCount(count: 0);
 });

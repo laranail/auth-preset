@@ -6,12 +6,12 @@ namespace Simtabi\Laranail\AuthPreset\Http\Controllers\Auth;
 
 use Illuminate\View\View;
 use Simtabi\Laranail\AuthPreset\Support\AuthPreset;
-use Simtabi\Laranail\Auth\Http\Controllers\AbstractRegisterController;
+use Simtabi\Laranail\Auth\Http\Controllers\AbstractPasswordResetLinkController;
 
-class RegisterController extends AbstractRegisterController
+class PasswordResetLinkController extends AbstractPasswordResetLinkController
 {
     public function create(): View
     {
-        return view(view: AuthPreset::view(page: 'register'));
+        return view(AuthPreset::view('forgot-password'));
     }
 }
