@@ -47,13 +47,21 @@ abstract class TestCase extends OrchestraTestCase
             Features::updateProfileInformation(),
             Features::updatePasswords(),
             Features::emailVerification(),
+            Features::passkeys(),
         ]);
     }
 
     protected function defineDatabaseMigrations(): void
     {
+        $authKitPasskeyMigrations = dirname(__DIR__) . '/vendor/laranail/auth-kit/database/migrations/passkeys';
+
+        if (! is_dir($authKitPasskeyMigrations)) {
+            $authKitPasskeyMigrations = dirname(__DIR__, 2) . '/laranail-auth-kit/database/migrations/passkeys';
+        }
+
         $this->loadMigrationsFrom(dirname(__DIR__) . '/vendor/orchestra/testbench-core/laravel/migrations');
         $this->loadMigrationsFrom(dirname(__DIR__) . '/vendor/laravel/fortify/database/migrations');
+        $this->loadMigrationsFrom($authKitPasskeyMigrations);
         $this->loadMigrationsFrom(dirname(__DIR__) . '/vendor/laravel/sanctum/database/migrations');
         $this->loadMigrationsFrom(dirname(__DIR__) . '/vendor/laranail/auth-kit/database/migrations/social');
     }

@@ -80,4 +80,21 @@
             </button>
         </div>
     </form>
+
+    @if (\Simtabi\Laranail\AuthPreset\Features::enabled(\Simtabi\Laranail\AuthPreset\Features::passkeys()))
+        <div
+            class="mt-6"
+            data-passkey-login
+            data-passkey-login-options-url="{{ route('passkey.login-options') }}"
+            data-passkey-login-url="{{ route('passkey.login') }}"
+        >
+            <button
+                type="button"
+                class="flex w-full justify-center rounded-md border border-indigo-600 px-3 py-2 text-sm font-semibold text-indigo-600 shadow-xs hover:bg-indigo-50"
+                data-passkey-login-button
+            >
+                Sign in with a passkey
+            </button>
+        </div>
+    @endif
 </x-auth-preset::layout>

@@ -55,4 +55,9 @@ final class Features
     {
         return 'email-verification';
     }
+
+    public static function passkeys(): string
+    {
+        return 'passkeys';
+    }
 }

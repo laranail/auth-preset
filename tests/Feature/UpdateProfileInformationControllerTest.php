@@ -8,7 +8,7 @@ use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
 
 function bindProfileInformationUpdater(): void
 {
-    app()->instance(UpdatesUserProfileInformation::class, new class () implements UpdatesUserProfileInformation {
+    app()->instance(abstract: UpdatesUserProfileInformation::class, instance: new class () implements UpdatesUserProfileInformation {
         public function update($user, array $input): void
         {
             $user->forceFill([
@@ -21,7 +21,7 @@ function bindProfileInformationUpdater(): void
 
 function bindFailingProfileInformationUpdater(): void
 {
-    app()->instance(UpdatesUserProfileInformation::class, new class () implements UpdatesUserProfileInformation {
+    app()->instance(abstract: UpdatesUserProfileInformation::class, instance: new class () implements UpdatesUserProfileInformation {
         public function update($user, array $input): void
         {
             throw ValidationException::withMessages([
@@ -31,7 +31,7 @@ function bindFailingProfileInformationUpdater(): void
     });
 }
 
-it('renders the profile information form for authenticated users', function (): void {
+it(description: 'renders the profile information form for authenticated users', closure: function (): void {
     $user = User::factory()->create([
         'name'  => 'Ada Lovelace',
         'email' => 'ada@example.com',
@@ -45,13 +45,13 @@ it('renders the profile information form for authenticated users', function (): 
         ->assertSee('ada@example.com');
 });
 
-it('updates profile information through the web route', function (): void {
+it(description: 'updates profile information through the web route', closure: function (): void {
     $user = User::factory()->create();
 
     bindProfileInformationUpdater();
 
     $this->actingAs($user)
-        ->put(route('user-profile-information.update'), [
+        ->put(uri: route('user-profile-information.update'), data: [
             'name'  => 'Grace Hopper',
             'email' => 'grace@example.com',
         ])
@@ -63,29 +63,29 @@ it('updates profile information through the web route', function (): void {
     ]);
 });
 
-it('returns profile validation errors in the Fortify error bag', function (): void {
+it(description: 'returns profile validation errors in the Fortify error bag', closure: function (): void {
     $user = User::factory()->create();
 
     bindFailingProfileInformationUpdater();
 
     $this->actingAs($user)
         ->from(route('user-profile-information.edit'))
-        ->put(route('user-profile-information.update'), [
+        ->put(uri: route('user-profile-information.update'), data: [
             'name'  => 'Grace Hopper',
             'email' => 'taken@example.com',
         ])
         ->assertRedirect(route('user-profile-information.edit'))
-        ->assertSessionHasErrorsIn('updateProfileInformation', ['email']);
+        ->assertSessionHasErrorsIn(errorBag: 'updateProfileInformation', keys: ['email']);
 });
 
-it('updates profile information through the Sanctum API route', function (): void {
+it(description: 'updates profile information through the Sanctum API route', closure: function (): void {
     $user = User::factory()->create();
     $token = $user->createToken('test-token');
 
     bindProfileInformationUpdater();
 
     $this->withToken($token->plainTextToken)
-        ->putJson(route('api.user-profile-information.update'), [
+        ->putJson(uri: route('api.user-profile-information.update'), data: [
             'name'  => 'Grace Hopper',
             'email' => 'grace@example.com',
         ])
