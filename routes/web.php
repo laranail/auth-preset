@@ -48,6 +48,18 @@ if (Features::enabled(Features::logout())) {
         });
 }
 
+if (Features::enabled(Features::updatePasswords())) {
+    Route::prefix(AuthPreset::webPrefix())
+        ->middleware([...AuthPreset::webMiddleware(), 'auth:' . AuthPreset::guard()])
+        ->group(function (): void {
+            Route::get('/user/password', [Auth\UpdatePasswordController::class, 'create'])
+                ->name('user-password.edit');
+
+            Route::put('/user/password', [Auth\UpdatePasswordController::class, 'update'])
+                ->name('user-password.update');
+        });
+}
+
 if (Features::enabled(Features::emailVerification())) {
     Route::prefix(AuthPreset::webPrefix())
         ->middleware([...AuthPreset::webMiddleware(), 'auth:' . AuthPreset::guard()])
