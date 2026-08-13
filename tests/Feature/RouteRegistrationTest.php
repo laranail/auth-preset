@@ -41,3 +41,11 @@ it(description: 'registers Fortify email verification routes when feature is ena
         ->and(value: $routes)->toHaveKey(key: 'verification.verify')
         ->and(value: $routes)->toHaveKey(key: 'verification.send');
 });
+
+it(description: 'registers password update routes when feature is enabled', closure: function (): void {
+    $routes = Route::getRoutes()->getRoutesByName();
+
+    expect(value: $routes)->toHaveKey(key: 'user-password.edit')
+        ->and(value: $routes)->toHaveKey(key: 'user-password.update')
+        ->and(value: $routes)->toHaveKey(key: 'api.user-password.update');
+});

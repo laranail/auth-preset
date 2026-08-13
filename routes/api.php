@@ -42,5 +42,11 @@ if (Features::enabled(Features::api())) {
                 Route::post('/reset-password', [Api\NewPasswordController::class, 'store'])
                     ->name('api.password.update');
             }
+
+            if (Features::enabled(Features::updatePasswords())) {
+                Route::put('/user/password', [Api\UpdatePasswordController::class, 'update'])
+                    ->middleware('auth:sanctum')
+                    ->name('api.user-password.update');
+            }
         });
 }

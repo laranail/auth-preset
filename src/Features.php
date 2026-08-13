@@ -41,6 +41,11 @@ final class Features
         return 'password-reset';
     }
 
+    public static function updatePasswords(): string
+    {
+        return 'update-passwords';
+    }
+
     public static function emailVerification(): string
     {
         return 'email-verification';
