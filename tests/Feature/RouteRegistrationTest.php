@@ -49,3 +49,11 @@ it(description: 'registers password update routes when feature is enabled', clos
         ->and(value: $routes)->toHaveKey(key: 'user-password.update')
         ->and(value: $routes)->toHaveKey(key: 'api.user-password.update');
 });
+
+it(description: 'registers profile information update routes when feature is enabled', closure: function (): void {
+    $routes = Route::getRoutes()->getRoutesByName();
+
+    expect(value: $routes)->toHaveKey(key: 'user-profile-information.edit')
+        ->and(value: $routes)->toHaveKey(key: 'user-profile-information.update')
+        ->and(value: $routes)->toHaveKey(key: 'api.user-profile-information.update');
+});

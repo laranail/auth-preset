@@ -48,5 +48,11 @@ if (Features::enabled(Features::api())) {
                     ->middleware('auth:sanctum')
                     ->name('api.user-password.update');
             }
+
+            if (Features::enabled(Features::updateProfileInformation())) {
+                Route::put('/user/profile-information', [Api\UpdateProfileInformationController::class, 'update'])
+                    ->middleware('auth:sanctum')
+                    ->name('api.user-profile-information.update');
+            }
         });
 }

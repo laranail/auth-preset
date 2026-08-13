@@ -60,6 +60,18 @@ if (Features::enabled(Features::updatePasswords())) {
         });
 }
 
+if (Features::enabled(Features::updateProfileInformation())) {
+    Route::prefix(AuthPreset::webPrefix())
+        ->middleware([...AuthPreset::webMiddleware(), 'auth:' . AuthPreset::guard()])
+        ->group(function (): void {
+            Route::get('/user/profile-information', [Auth\UpdateProfileInformationController::class, 'create'])
+                ->name('user-profile-information.edit');
+
+            Route::put('/user/profile-information', [Auth\UpdateProfileInformationController::class, 'update'])
+                ->name('user-profile-information.update');
+        });
+}
+
 if (Features::enabled(Features::emailVerification())) {
     Route::prefix(AuthPreset::webPrefix())
         ->middleware([...AuthPreset::webMiddleware(), 'auth:' . AuthPreset::guard()])
