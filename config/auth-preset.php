@@ -32,6 +32,7 @@ return [
         \Simtabi\Laranail\AuthPreset\Features::updateProfileInformation(),
         \Simtabi\Laranail\AuthPreset\Features::updatePasswords(),
         \Simtabi\Laranail\AuthPreset\Features::emailVerification(),
+        \Simtabi\Laranail\AuthPreset\Features::passkeys(),
     ],
 
     'routes' => [

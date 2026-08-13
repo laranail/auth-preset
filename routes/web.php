@@ -72,6 +72,15 @@ if (Features::enabled(Features::updateProfileInformation())) {
         });
 }
 
+if (Features::enabled(Features::passkeys())) {
+    Route::prefix(AuthPreset::webPrefix())
+        ->middleware([...AuthPreset::webMiddleware(), 'auth:' . AuthPreset::guard()])
+        ->group(function (): void {
+            Route::get('/user/passkeys', [Auth\PasskeysController::class, 'index'])
+                ->name('user-passkeys.index');
+        });
+}
+
 if (Features::enabled(Features::emailVerification())) {
     Route::prefix(AuthPreset::webPrefix())
         ->middleware([...AuthPreset::webMiddleware(), 'auth:' . AuthPreset::guard()])

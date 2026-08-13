@@ -57,3 +57,17 @@ it(description: 'registers profile information update routes when feature is ena
         ->and(value: $routes)->toHaveKey(key: 'user-profile-information.update')
         ->and(value: $routes)->toHaveKey(key: 'api.user-profile-information.update');
 });
+
+it(description: 'registers the passkey management page and Fortify passkey routes', closure: function (): void {
+    $routes = Route::getRoutes()->getRoutesByName();
+
+    expect(value: $routes)->toHaveKey(key: 'user-passkeys.index')
+        ->and(value: $routes)->toHaveKey(key: 'passkey.login-options')
+        ->and(value: $routes)->toHaveKey(key: 'passkey.login')
+        ->and(value: $routes)->toHaveKey(key: 'passkey.confirm-options')
+        ->and(value: $routes)->toHaveKey(key: 'passkey.confirm')
+        ->and(value: $routes)->toHaveKey(key: 'passkey.registration-options')
+        ->and(value: $routes)->toHaveKey(key: 'passkey.store')
+        ->and(value: $routes)->toHaveKey(key: 'passkey.destroy')
+        ->and(value: $routes)->not->toHaveKey(key: 'api.passkey.login');
+});

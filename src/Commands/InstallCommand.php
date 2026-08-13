@@ -26,6 +26,7 @@ class InstallCommand extends Command
         {--api : Enable API authentication with Sanctum tokens}
         {--password-reset : Enable password reset flow}
         {--email-verification : Enable email verification flow}
+        {--passkeys : Enable passkey authentication and publish its migration}
         {--publish-routes : Publish package route files for application ownership}
         {--publish-controllers : Reserved for a future controller publishing workflow}
         {--publish-views : Publish Blade views for application ownership}
@@ -51,6 +52,7 @@ class InstallCommand extends Command
         $wantsApi = $this->resolveApiPreference();
         $wantsPasswordReset = $this->resolvePasswordReset();
         $wantsEmailVerification = $this->resolveEmailVerification();
+        $wantsPasskeys = $this->resolvePasskeys();
 
         $this->publish(tag: 'auth-kit-config');
         $this->publish(tag: 'auth-preset-config');
@@ -67,6 +69,12 @@ class InstallCommand extends Command
             $this->info('Sanctum token migration published. Run `php artisan migrate` to create the personal_access_tokens table.');
         }
 
+        if ($wantsPasskeys) {
+            $this->publish(tag: 'auth-kit-passkey-migrations');
+            $this->newLine();
+            $this->info('Passkeys migration published. Run `php artisan migrate` to create the passkeys table.');
+        }
+
         if ($this->option('publish-routes')) {
             $this->publish('auth-preset-routes');
         }
@@ -79,7 +87,7 @@ class InstallCommand extends Command
             $this->warn('Controller publishing is not needed yet: extend the package controllers or use auth-kit contracts in your application controller.');
         }
 
-        $this->configureFeatures($socialProviders, $wantsApi, $wantsPasswordReset, $wantsEmailVerification);
+        $this->configureFeatures($socialProviders, $wantsApi, $wantsPasswordReset, $wantsEmailVerification, $wantsPasskeys);
 
         $this->info('auth-preset is ready. Package routes are registered automatically.');
         $this->line('Visit /auth/register or /auth/login. Review config/auth-preset.php to enable or disable features.');
@@ -171,10 +179,27 @@ class InstallCommand extends Command
         );
     }
 
-    /** @param array<int, string> $providers */
-    private function configureFeatures(array $providers, bool $wantsApi, bool $wantsPasswordReset, bool $wantsEmailVerification): void
+    private function resolvePasskeys(): bool
     {
-        if (count($providers) === 0 && ! $wantsApi && ! $wantsPasswordReset && ! $wantsEmailVerification) {
+        if ($this->input->hasParameterOption('--passkeys')) {
+            return true;
+        }
+
+        if (! $this->input->isInteractive()) {
+            return false;
+        }
+
+        return confirm(
+            label: 'Would you like to enable passkey authentication?',
+            default: true,
+            hint: 'Publishes the passkeys migration and enables the Fortify passkey UI.',
+        );
+    }
+
+    /** @param array<int, string> $providers */
+    private function configureFeatures(array $providers, bool $wantsApi, bool $wantsPasswordReset, bool $wantsEmailVerification, bool $wantsPasskeys): void
+    {
+        if (count($providers) === 0 && ! $wantsApi && ! $wantsPasswordReset && ! $wantsEmailVerification && ! $wantsPasskeys) {
             return;
         }
 
@@ -204,6 +229,11 @@ class InstallCommand extends Command
         if ($wantsApi && ! str_contains($contents, 'Features::api()')) {
             $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::logout\(\),)/";
             $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::api(),", $contents, limit: 1);
+        }
+
+        if ($wantsPasskeys && ! str_contains($contents, 'Features::passkeys()')) {
+            $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::logout\(\),)/";
+            $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::passkeys(),", $contents, limit: 1);
         }
 
         if (count($providers) > 0) {
