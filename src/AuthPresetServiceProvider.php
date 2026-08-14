@@ -14,6 +14,11 @@ class AuthPresetServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/auth-preset.php', 'auth-preset');
+
+        config()->set(
+            key: 'auth-kit.turnstile.enabled',
+            value: Features::enabled(Features::turnstile()),
+        );
     }
 
     public function boot(): void
@@ -23,6 +28,9 @@ class AuthPresetServiceProvider extends ServiceProvider
         $this->loadViews();
         $this->registerFortifyViews();
         $this->loadRoutes();
+        $this->app->booted(function (): void {
+            $this->registerTurnstileMiddleware();
+        });
     }
 
     private function registerFortifyViews(): void
@@ -106,5 +114,16 @@ class AuthPresetServiceProvider extends ServiceProvider
 
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
         $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
+    }
+
+    private function registerTurnstileMiddleware(): void
+    {
+        foreach (['register.store', 'password.email', 'password.update'] as $name) {
+            $route = app('router')->getRoutes()->getByName($name);
+
+            if ($route !== null && in_array('web', $route->middleware(), true)) {
+                $route->middleware(\Simtabi\Laranail\Auth\Http\Middleware\ValidateTurnstile::class);
+            }
+        }
     }
 }

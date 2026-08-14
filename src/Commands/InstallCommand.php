@@ -27,6 +27,7 @@ class InstallCommand extends Command
         {--password-reset : Enable password reset flow}
         {--email-verification : Enable email verification flow}
         {--passkeys : Enable passkey authentication and publish its migration}
+        {--turnstile : Enable Cloudflare Turnstile validation on guest forms}
         {--publish-routes : Publish package route files for application ownership}
         {--publish-controllers : Reserved for a future controller publishing workflow}
         {--publish-views : Publish Blade views for application ownership}
@@ -53,6 +54,7 @@ class InstallCommand extends Command
         $wantsPasswordReset = $this->resolvePasswordReset();
         $wantsEmailVerification = $this->resolveEmailVerification();
         $wantsPasskeys = $this->resolvePasskeys();
+        $wantsTurnstile = $this->resolveTurnstile();
 
         $this->publish(tag: 'auth-kit-config');
         $this->publish(tag: 'auth-preset-config');
@@ -87,7 +89,7 @@ class InstallCommand extends Command
             $this->warn('Controller publishing is not needed yet: extend the package controllers or use auth-kit contracts in your application controller.');
         }
 
-        $this->configureFeatures($socialProviders, $wantsApi, $wantsPasswordReset, $wantsEmailVerification, $wantsPasskeys);
+        $this->configureFeatures($socialProviders, $wantsApi, $wantsPasswordReset, $wantsEmailVerification, $wantsPasskeys, $wantsTurnstile);
 
         $this->info('auth-preset is ready. Package routes are registered automatically.');
         $this->line('Visit /auth/register or /auth/login. Review config/auth-preset.php to enable or disable features.');
@@ -101,6 +103,13 @@ class InstallCommand extends Command
             $this->info('Social login enabled for: ' . implode(', ', $socialProviders) . '.');
             $this->line('Set your OAuth credentials in .env for each enabled provider.');
             $this->writeEnvExample($socialProviders);
+        }
+
+        if ($wantsTurnstile) {
+            $this->newLine();
+            $this->info('Turnstile validation enabled for guest forms.');
+            $this->line('Add TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY to your .env file.');
+            $this->line('Optionally add TURNSTILE_URL to override the default Cloudflare verification endpoint.');
         }
 
         return self::SUCCESS;
@@ -196,10 +205,27 @@ class InstallCommand extends Command
         );
     }
 
-    /** @param array<int, string> $providers */
-    private function configureFeatures(array $providers, bool $wantsApi, bool $wantsPasswordReset, bool $wantsEmailVerification, bool $wantsPasskeys): void
+    private function resolveTurnstile(): bool
     {
-        if (count($providers) === 0 && ! $wantsApi && ! $wantsPasswordReset && ! $wantsEmailVerification && ! $wantsPasskeys) {
+        if ($this->input->hasParameterOption('--turnstile')) {
+            return true;
+        }
+
+        if (! $this->input->isInteractive()) {
+            return false;
+        }
+
+        return confirm(
+            label: 'Would you like to enable Cloudflare Turnstile validation on guest forms?',
+            default: false,
+            hint: 'Requires TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY in your environment.',
+        );
+    }
+
+    /** @param array<int, string> $providers */
+    private function configureFeatures(array $providers, bool $wantsApi, bool $wantsPasswordReset, bool $wantsEmailVerification, bool $wantsPasskeys, bool $wantsTurnstile): void
+    {
+        if (count($providers) === 0 && ! $wantsApi && ! $wantsPasswordReset && ! $wantsEmailVerification && ! $wantsPasskeys && ! $wantsTurnstile) {
             return;
         }
 
@@ -234,6 +260,11 @@ class InstallCommand extends Command
         if ($wantsPasskeys && ! str_contains($contents, 'Features::passkeys()')) {
             $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::logout\(\),)/";
             $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::passkeys(),", $contents, limit: 1);
+        }
+
+        if ($wantsTurnstile && ! str_contains($contents, 'Features::turnstile()')) {
+            $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::logout\\(\\),)/";
+            $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::turnstile(),", $contents, limit: 1);
         }
 
         if (count($providers) > 0) {
