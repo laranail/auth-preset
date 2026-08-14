@@ -254,7 +254,7 @@ it('adds selected social and Turnstile environment variables to both env files w
                 ->toContain('AUTH_KIT_LINKEDIN_REDIRECT=http://localhost/auth/social/linkedin/callback')
                 ->toContain('TURNSTILE_SITE_KEY=')
                 ->toContain('TURNSTILE_SECRET_KEY=')
-                ->toContain('TURNSTILE_URL=');
+                ->not->toContain('TURNSTILE_URL=');
         }
 
         expect(file_get_contents($envPath))
@@ -265,7 +265,7 @@ it('adds selected social and Turnstile environment variables to both env files w
         $configurator->invoke($command, ['google', 'linkedin'], true, $envPath, $envExamplePath);
 
         expect(mb_substr_count(file_get_contents($envPath), 'AUTH_KIT_GOOGLE_CLIENT_ID='))->toBe(1)
-            ->and(mb_substr_count(file_get_contents($envExamplePath), 'TURNSTILE_URL='))->toBe(1);
+            ->and(mb_substr_count(file_get_contents($envExamplePath), 'TURNSTILE_URL='))->toBe(0);
     } finally {
         unlink($envPath);
         unlink($envExamplePath);

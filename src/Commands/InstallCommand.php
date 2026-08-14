@@ -644,7 +644,6 @@ class InstallCommand extends Command
         if ($wantsTurnstile) {
             $variables['TURNSTILE_SITE_KEY'] = '';
             $variables['TURNSTILE_SECRET_KEY'] = '';
-            $variables['TURNSTILE_URL'] = '';
         }
 
         if (count($variables) === 0) {
