@@ -23,7 +23,7 @@ Run the installer and follow the prompts:
 php artisan laranail:authkit.install
 ```
 
-The installer currently supports the Blade stack. It publishes the Auth Kit and auth preset configuration, then asks which optional authentication features should be enabled. Package routes are registered automatically by default.
+The installer currently supports the Blade stack. It publishes the Auth Kit and auth preset configuration, then presents one multi-select prompt for authentication features. All available features are selected by default; use the prompt's space key to disable features you do not need. Package routes are registered automatically by default.
 
 After installation, the default web routes are available under `/auth`:
 
@@ -70,7 +70,7 @@ Available options:
 
 Supported social providers are `google`, `facebook`, `twitter`, `linkedin`, and `paypal`.
 
-In interactive mode, optional features are prompted for individually. When API authentication or passkeys are enabled, the installer reads the `eloquent` providers from `config/auth.php` and asks which configured model should be updated. In non-interactive mode, a single Eloquent provider is selected automatically; use `--model=<class>` when multiple providers are configured.
+In interactive mode, the installer asks `Which authentication feature would you like to enable?` and shows a description for every choice. This includes API authentication, which is selected by default and publishes the Sanctum migration. Social login opens a second multi-select for its providers, also with all providers selected by default. When API authentication or passkeys are enabled, the installer reads the `eloquent` providers from `config/auth.php` and asks which configured model should be updated. In non-interactive mode, only the base web features are enabled unless optional feature flags are supplied; use `--model=<class>` when multiple providers are configured.
 
 The selected model receives `Laravel\Sanctum\HasApiTokens` when API authentication is enabled. When passkeys are enabled, it receives the `Laravel\Fortify\Contracts\PasskeyUser` interface and Auth Kit's `Simtabi\Laranail\Auth\PasskeyAuthenticatable` trait. The model source file must be writable.
 
