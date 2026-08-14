@@ -6,48 +6,67 @@ use Illuminate\Support\Facades\Artisan;
 use Symfony\Component\Console\Input\ArrayInput;
 use Simtabi\Laranail\AuthPreset\Commands\InstallCommand;
 
-it('keeps passkeys disabled by default and offers opt-in migration installation', function (): void {
+it('offers one feature selection with API, passkeys, and Turnstile choices', function (): void {
     $command = Artisan::all()['laranail:authkit.install'];
 
-    expect($command->getDefinition()->hasOption('passkeys'))->toBeTrue();
-
-    $config = require dirname(__DIR__, 2) . '/config/auth-preset.php';
-
-    expect($config['features'])->not->toContain('passkeys');
+    expect($command->getDefinition()->hasOption('api'))->toBeTrue()
+        ->and($command->getDefinition()->hasOption('passkeys'))->toBeTrue()
+        ->and($command->getDefinition()->hasOption('turnstile'))->toBeTrue();
 
     $reflection = new ReflectionClass(InstallCommand::class);
     $inputProperty = $reflection->getParentClass()->getProperty('input');
-    $resolver = $reflection->getMethod('resolvePasskeys');
+    $resolver = $reflection->getMethod('resolveFeatures');
 
     $inputProperty->setValue($command, new ArrayInput([], $command->getDefinition()));
     $inputProperty->getValue($command)->setInteractive(false);
 
-    expect($resolver->invoke($command))->toBeFalse();
+    expect($resolver->invoke($command))->toBe([
+        'login',
+        'registration',
+        'logout',
+        'update-profile-information',
+        'update-passwords',
+    ]);
 
-    $inputProperty->setValue($command, new ArrayInput(['--passkeys' => true], $command->getDefinition()));
+    $inputProperty->setValue($command, new ArrayInput([
+        '--api'                => true,
+        '--passkeys'           => true,
+        '--turnstile'          => true,
+        '--email-verification' => true,
+        '--password-reset'     => true,
+    ], $command->getDefinition()));
     $inputProperty->getValue($command)->setInteractive(false);
 
-    expect($resolver->invoke($command))->toBeTrue();
+    expect($resolver->invoke($command))->toContain('api')
+        ->toContain('passkeys')
+        ->toContain('turnstile')
+        ->toContain('email-verification')
+        ->toContain('password-reset');
 });
 
-it('offers Turnstile installation and keeps it disabled for non-interactive installs', function (): void {
+it('writes the selected feature set without retaining deselected features', function (): void {
     $command = Artisan::all()['laranail:authkit.install'];
-
-    expect($command->getDefinition()->hasOption('turnstile'))->toBeTrue();
-
     $reflection = new ReflectionClass(InstallCommand::class);
-    $inputProperty = $reflection->getParentClass()->getProperty('input');
-    $resolver = $reflection->getMethod('resolveTurnstile');
+    $configurator = $reflection->getMethod('configureFeatures');
+    $configPath = tempnam(dirname(__DIR__, 2), 'auth-preset-config-');
+    $source = file_get_contents(dirname(__DIR__, 2) . '/config/auth-preset.php');
 
-    $inputProperty->setValue($command, new ArrayInput([], $command->getDefinition()));
-    $inputProperty->getValue($command)->setInteractive(false);
+    file_put_contents($configPath, $source);
 
-    expect($resolver->invoke($command))->toBeFalse();
+    try {
+        $configurator->invoke($command, ['login', 'registration', 'api'], [], $configPath);
+        $contents = file_get_contents($configPath);
 
-    $inputProperty->setValue($command, new ArrayInput(['--turnstile' => true], $command->getDefinition()));
-    $inputProperty->getValue($command)->setInteractive(false);
-
-    expect($resolver->invoke($command))->toBeTrue();
+        expect($contents)
+            ->toContain('Features::login()')
+            ->toContain('Features::registration()')
+            ->toContain('Features::api()')
+            ->not->toContain('Features::logout()')
+            ->not->toContain('Features::passwordReset()')
+            ->not->toContain('Features::turnstile()');
+    } finally {
+        unlink($configPath);
+    }
 });
 
 it('selects the configured Eloquent model and supports explicit non-interactive selection', function (): void {

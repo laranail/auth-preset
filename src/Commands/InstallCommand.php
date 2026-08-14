@@ -9,7 +9,6 @@ use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 
 use function Laravel\Prompts\select;
-use function Laravel\Prompts\confirm;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,6 +19,34 @@ class InstallCommand extends Command
     private const TAILWIND_BLADE_SOURCE = "@source '../../vendor/laravel/laranail/**/*.blade.php';";
 
     private const PASSKEYS_NPM_PACKAGE = '@laravel/passkeys';
+
+    private const AUTHENTICATION_FEATURES = [
+        'login'                      => 'Login',
+        'registration'               => 'Registration',
+        'logout'                     => 'Logout',
+        'update-profile-information' => 'Profile information updates',
+        'update-passwords'           => 'Password updates',
+        'social'                     => 'Social login',
+        'api'                        => 'API authentication',
+        'password-reset'             => 'Password reset',
+        'email-verification'         => 'Email verification',
+        'passkeys'                   => 'Passkey authentication',
+        'turnstile'                  => 'Cloudflare Turnstile',
+    ];
+
+    private const FEATURE_DESCRIPTIONS = [
+        'login'                      => 'Adds the web login form and authentication endpoint.',
+        'registration'               => 'Adds the web registration form and account creation endpoint.',
+        'logout'                     => 'Adds the web logout endpoint for authenticated users.',
+        'update-profile-information' => 'Adds the authenticated profile information form and endpoint.',
+        'update-passwords'           => 'Adds the authenticated password update form and endpoint.',
+        'social'                     => 'Adds OAuth callback routes for the providers selected next.',
+        'api'                        => 'Adds Sanctum token authentication routes and publishes its migration.',
+        'password-reset'             => 'Adds forgot-password and reset-password views and routes.',
+        'email-verification'         => 'Sends and verifies registration email addresses through Fortify.',
+        'passkeys'                   => 'Adds passkey routes, migration, and the official browser client.',
+        'turnstile'                  => 'Protects your frontend forms from bots with Cloudflare Turnstile.',
+    ];
 
     private const SOCIAL_PROVIDERS = [
         'google'   => 'Google',
@@ -58,12 +85,20 @@ class InstallCommand extends Command
             return self::FAILURE;
         }
 
-        $socialProviders = $this->resolveSocialProviders();
-        $wantsApi = $this->resolveApiPreference();
-        $wantsPasswordReset = $this->resolvePasswordReset();
-        $wantsEmailVerification = $this->resolveEmailVerification();
-        $wantsPasskeys = $this->resolvePasskeys();
-        $wantsTurnstile = $this->resolveTurnstile();
+        $features = $this->resolveFeatures();
+        $socialProviders = $this->resolveSocialProviders(in_array('social', $features, true));
+        $wantsApi = in_array('api', $features, true);
+        $wantsPasswordReset = in_array('password-reset', $features, true);
+        $wantsEmailVerification = in_array('email-verification', $features, true);
+        $wantsPasskeys = in_array('passkeys', $features, true);
+        $wantsTurnstile = in_array('turnstile', $features, true);
+
+        if (count($socialProviders) === 0) {
+            $features = array_values(array_diff($features, ['social']));
+        } elseif (! in_array('social', $features, true)) {
+            $features[] = 'social';
+        }
+
         $authModel = $this->resolveAuthModel($wantsApi, $wantsPasskeys);
 
         if (($wantsApi || $wantsPasskeys) && $authModel === null) {
@@ -122,7 +157,7 @@ class InstallCommand extends Command
             $this->warn('Controller publishing is not needed yet: extend the package controllers or use auth-kit contracts in your application controller.');
         }
 
-        $this->configureFeatures($socialProviders, $wantsApi, $wantsPasswordReset, $wantsEmailVerification, $wantsPasskeys, $wantsTurnstile);
+        $this->configureFeatures($features, $socialProviders);
 
         $this->info('auth-preset is ready. Package routes are registered automatically.');
         $this->line('Visit /auth/register or /auth/login. Review config/auth-preset.php to enable or disable features.');
@@ -150,7 +185,43 @@ class InstallCommand extends Command
     }
 
     /** @return array<int, string> */
-    private function resolveSocialProviders(): array
+    private function resolveFeatures(): array
+    {
+        $explicit = [];
+
+        foreach (['api', 'password-reset', 'email-verification', 'passkeys', 'turnstile'] as $feature) {
+            if ($this->input->hasParameterOption('--' . $feature)) {
+                $explicit[] = $feature;
+            }
+        }
+
+        if (count($this->option('social')) > 0) {
+            $explicit[] = 'social';
+        }
+
+        if (! $this->input->isInteractive()) {
+            return array_values(array_unique(array_merge([
+                'login',
+                'registration',
+                'logout',
+                'update-profile-information',
+                'update-passwords',
+            ], $explicit)));
+        }
+
+        $features = multiselect(
+            label: 'Which authentication feature would you like to enable?',
+            options: self::AUTHENTICATION_FEATURES,
+            default: array_keys(self::AUTHENTICATION_FEATURES),
+            info: static fn (string $feature): ?string => self::FEATURE_DESCRIPTIONS[$feature] ?? null,
+            hint: 'All features are selected by default. Press space to disable features you do not need.',
+        );
+
+        return array_values(array_unique(array_merge($features, $explicit)));
+    }
+
+    /** @return array<int, string> */
+    private function resolveSocialProviders(bool $featureSelected): array
     {
         $optionProviders = $this->option('social');
 
@@ -158,101 +229,16 @@ class InstallCommand extends Command
             return array_values(array_intersect($optionProviders, array_keys(self::SOCIAL_PROVIDERS)));
         }
 
-        if (! $this->input->isInteractive()) {
+        if (! $featureSelected || ! $this->input->isInteractive()) {
             return [];
         }
 
         return multiselect(
             label: 'Which social login providers would you like to enable?',
             options: self::SOCIAL_PROVIDERS,
-            default: [],
+            default: array_keys(self::SOCIAL_PROVIDERS),
             required: false,
-            hint: 'Leave empty to skip social login.',
-        );
-    }
-
-    private function resolveApiPreference(): bool
-    {
-        if ($this->option('api') !== null) {
-            return (bool) $this->option('api');
-        }
-
-        if (! $this->input->isInteractive()) {
-            return false;
-        }
-
-        return confirm(
-            label: 'Would you like to enable API authentication with Sanctum tokens?',
-            default: false,
-            hint: 'Publishes the personal_access_tokens migration and enables API routes.',
-        );
-    }
-
-    private function resolvePasswordReset(): bool
-    {
-        if ($this->option('password-reset') !== null) {
-            return (bool) $this->option('password-reset');
-        }
-
-        if (! $this->input->isInteractive()) {
-            return false;
-        }
-
-        return confirm(
-            label: 'Would you like to enable password reset?',
-            default: true,
-            hint: 'Adds forgot-password and reset-password views and routes via Fortify.',
-        );
-    }
-
-    private function resolveEmailVerification(): bool
-    {
-        if ($this->option('email-verification') !== null) {
-            return (bool) $this->option('email-verification');
-        }
-
-        if (! $this->input->isInteractive()) {
-            return false;
-        }
-
-        return confirm(
-            label: 'Would you like to enable email verification?',
-            default: true,
-            hint: 'Sends a verification email after registration via Fortify.',
-        );
-    }
-
-    private function resolvePasskeys(): bool
-    {
-        if ($this->input->hasParameterOption('--passkeys')) {
-            return true;
-        }
-
-        if (! $this->input->isInteractive()) {
-            return false;
-        }
-
-        return confirm(
-            label: 'Would you like to enable passkey authentication?',
-            default: false,
-            hint: 'Publishes the passkeys migration and enables the Fortify passkey UI.',
-        );
-    }
-
-    private function resolveTurnstile(): bool
-    {
-        if ($this->input->hasParameterOption('--turnstile')) {
-            return true;
-        }
-
-        if (! $this->input->isInteractive()) {
-            return false;
-        }
-
-        return confirm(
-            label: 'Would you like to enable Cloudflare Turnstile validation on guest forms?',
-            default: false,
-            hint: 'Requires TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY in your environment.',
+            hint: 'All providers are selected by default. Disable providers you do not plan to configure.',
         );
     }
 
@@ -538,56 +524,55 @@ class InstallCommand extends Command
         return $changed;
     }
 
-    /** @param array<int, string> $providers */
-    private function configureFeatures(array $providers, bool $wantsApi, bool $wantsPasswordReset, bool $wantsEmailVerification, bool $wantsPasskeys, bool $wantsTurnstile): void
+    /**
+     * @param array<int, string> $features
+     * @param array<int, string> $providers
+     */
+    private function configureFeatures(array $features, array $providers, ?string $configPath = null): void
     {
-        if (count($providers) === 0 && ! $wantsApi && ! $wantsPasswordReset && ! $wantsEmailVerification && ! $wantsPasskeys && ! $wantsTurnstile) {
-            return;
-        }
-
-        $configPath = config_path('auth-preset.php');
+        $configPath ??= config_path('auth-preset.php');
 
         if (! file_exists($configPath)) {
             return;
         }
 
         $contents = file_get_contents($configPath);
+        $featureMethods = [
+            'login'                      => 'login',
+            'registration'               => 'registration',
+            'logout'                     => 'logout',
+            'update-profile-information' => 'updateProfileInformation',
+            'update-passwords'           => 'updatePasswords',
+            'social'                     => 'social',
+            'api'                        => 'api',
+            'password-reset'             => 'passwordReset',
+            'email-verification'         => 'emailVerification',
+            'passkeys'                   => 'passkeys',
+            'turnstile'                  => 'turnstile',
+        ];
+        $featureLines = [];
 
-        if (count($providers) > 0 && ! str_contains($contents, 'Features::social()')) {
-            $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::login\(\),)/";
-            $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::social(),", $contents, limit: 1);
+        foreach ($featureMethods as $feature => $method) {
+            if (in_array($feature, $features, true) && ($feature !== 'social' || count($providers) > 0)) {
+                $featureLines[] = "        \\Simtabi\\Laranail\\AuthPreset\\Features::{$method}(),";
+            }
         }
 
-        if ($wantsPasswordReset && ! str_contains($contents, 'Features::passwordReset()')) {
-            $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::logout\(\),)/";
-            $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::passwordReset(),", $contents, limit: 1);
-        }
+        $featureBlock = "    'features' => [\n" . implode("\n", $featureLines) . "\n    ],";
+        $contents = preg_replace(
+            "/    'features'\s*=>\s*\[(?:.|\R)*?\n    \],/",
+            $featureBlock,
+            $contents,
+            1,
+        ) ?? $contents;
 
-        if ($wantsEmailVerification && ! str_contains($contents, 'Features::emailVerification()')) {
-            $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::logout\(\),)/";
-            $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::emailVerification(),", $contents, limit: 1);
-        }
-
-        if ($wantsApi && ! str_contains($contents, 'Features::api()')) {
-            $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::logout\(\),)/";
-            $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::api(),", $contents, limit: 1);
-        }
-
-        if ($wantsPasskeys && ! str_contains($contents, 'Features::passkeys()')) {
-            $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::logout\(\),)/";
-            $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::passkeys(),", $contents, limit: 1);
-        }
-
-        if ($wantsTurnstile && ! str_contains($contents, 'Features::turnstile()')) {
-            $pattern = "/(\\\\Simtabi\\\\Laranail\\\\AuthPreset\\\\Features::logout\\(\\),)/";
-            $contents = preg_replace($pattern, "$1\n        \\Simtabi\\Laranail\\AuthPreset\\Features::turnstile(),", $contents, limit: 1);
-        }
-
-        if (count($providers) > 0) {
-            $providerArray = "['" . implode("', '", $providers) . "']";
-            $pattern = "/'providers'\s*=>\s*\[[^\]]*\]/";
-            $contents = preg_replace($pattern, "'providers' => {$providerArray}", $contents);
-        }
+        $providerArray = "['" . implode("', '", $providers) . "']";
+        $contents = preg_replace(
+            "/'providers'\s*=>\s*\[[^\]]*\]/",
+            "'providers' => {$providerArray}",
+            $contents,
+            1,
+        ) ?? $contents;
 
         file_put_contents($configPath, $contents);
     }
