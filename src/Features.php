@@ -60,4 +60,9 @@ final class Features
     {
         return 'passkeys';
     }
+
+    public static function turnstile(): string
+    {
+        return 'turnstile';
+    }
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "64e5bc96d569e855dc3d2b3607b36024",
+    "content-hash": "02a45e75b081f8c67671c66dd1b2af3f",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1279,16 +1279,10 @@
         {
             "name": "laranail/auth-kit",
             "version": "dev-main",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laranail/auth-kit.git",
-                "reference": "bb9002f549be18f2d9be114761bc1415c7113ffd"
-            },
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/laranail/auth-kit/zipball/bb9002f549be18f2d9be114761bc1415c7113ffd",
-                "reference": "bb9002f549be18f2d9be114761bc1415c7113ffd",
-                "shasum": ""
+                "type": "path",
+                "url": "../laranail-auth-kit",
+                "reference": "ae57b9aa2818b923455cff13a29317b1d924c014"
             },
             "require": {
                 "laravel/fortify": "^1.38",
@@ -1304,7 +1298,6 @@
                 "pestphp/pest": "^4.0",
                 "pestphp/pest-plugin-laravel": "^4.0"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -1365,11 +1358,10 @@
                 "laravel",
                 "scaffolding"
             ],
-            "support": {
-                "source": "https://github.com/laranail/auth-kit/tree/main",
-                "issues": "https://github.com/laranail/auth-kit/issues"
-            },
-            "time": "2026-08-13T19:33:06+00:00"
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "laravel/fortify",
