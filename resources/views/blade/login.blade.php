@@ -28,7 +28,7 @@
                     :value="old('email')"
                     required
                     autofocus
-                    autocomplete="email"
+                    autocomplete="email webauthn"
                     placeholder="you@example.com"
                     :error="$errors->has('email')"
                 />
@@ -88,6 +88,7 @@
             data-passkey-login-options-url="{{ route('passkey.login-options') }}"
             data-passkey-login-url="{{ route('passkey.login') }}"
         >
+            <p class="mb-3 text-sm text-red-600" data-passkey-error hidden></p>
             <button
                 type="button"
                 class="flex w-full justify-center rounded-md border border-indigo-600 px-3 py-2 text-sm font-semibold text-indigo-600 shadow-xs hover:bg-indigo-50"

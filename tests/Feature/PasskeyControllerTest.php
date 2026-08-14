@@ -20,7 +20,8 @@ it(description: 'renders an empty passkey management page for authenticated user
         ->assertSee(value: 'data-passkey-management', escape: false)
         ->assertSee('No passkeys registered yet.')
         ->assertSee(value: route('passkey.registration-options'), escape: false)
-        ->assertSee(value: route('passkey.store'), escape: false);
+        ->assertSee(value: route('passkey.store'), escape: false)
+        ->assertSee(value: 'data-passkey-register-error', escape: false);
 });
 
 it(description: 'renders multiple registered passkeys with deletion hooks', closure: function (): void {
@@ -44,7 +45,8 @@ it(description: 'renders multiple registered passkeys with deletion hooks', clos
         ->assertSee('iPhone')
         ->assertSee(value: route(name: 'passkey.destroy', parameters: ['passkey' => $first]), escape: false)
         ->assertSee(value: route(name: 'passkey.destroy', parameters: ['passkey' => $second]), escape: false)
-        ->assertSee(value: 'data-passkey-delete', escape: false);
+        ->assertSee(value: 'data-passkey-delete', escape: false)
+        ->assertSee(value: 'data-passkey-delete-error', escape: false);
 });
 
 it(description: 'protects the passkey management page with the configured guard', closure: function (): void {
@@ -60,6 +62,7 @@ it(description: 'adds passkey login hooks to the login view when enabled', closu
         ->assertSee(value: 'data-passkey-login', escape: false)
         ->assertSee(value: route('passkey.login-options'), escape: false)
         ->assertSee(value: route('passkey.login'), escape: false)
+        ->assertSee(value: 'data-passkey-error', escape: false)
         ->assertSee('Sign in with a passkey');
 });
 

@@ -46,6 +46,7 @@ php artisan laranail:authkit.install \
     --email-verification \
     --api \
     --passkeys \
+    --model='App\Models\User' \
     --turnstile \
     --social=google \
     --social=linkedin
@@ -60,7 +61,8 @@ Available options:
 | `--api` | Enable API authentication and publish the Sanctum token migration. |
 | `--password-reset` | Enable forgot-password and reset-password flows. |
 | `--email-verification` | Enable email verification. |
-| `--passkeys` | Enable passkey authentication and publish its migration. |
+| `--passkeys` | Enable passkey authentication, migration, and browser client. |
+| `--model=<class>` | Select the Eloquent auth model to configure for Sanctum and/or passkeys. |
 | `--turnstile` | Enable Turnstile validation on registration and password-reset forms. |
 | `--publish-routes` | Publish route files for application ownership. |
 | `--publish-views` | Publish Blade views for application customization. |
@@ -68,7 +70,11 @@ Available options:
 
 Supported social providers are `google`, `facebook`, `twitter`, `linkedin`, and `paypal`.
 
-In interactive mode, optional features are prompted for individually. In non-interactive mode, optional features remain disabled unless their command option is supplied.
+In interactive mode, optional features are prompted for individually. When API authentication or passkeys are enabled, the installer reads the `eloquent` providers from `config/auth.php` and asks which configured model should be updated. In non-interactive mode, a single Eloquent provider is selected automatically; use `--model=<class>` when multiple providers are configured.
+
+The selected model receives `Laravel\Sanctum\HasApiTokens` when API authentication is enabled. When passkeys are enabled, it receives the `Laravel\Fortify\Contracts\PasskeyUser` interface and Auth Kit's `Simtabi\Laranail\Auth\PasskeyAuthenticatable` trait. The model source file must be writable.
+
+When passkeys are enabled, the installer adds `@laravel/passkeys` to `package.json`, copies the passkey browser adapter to `resources/js/passkeys.js`, and imports it from `resources/js/app.js`. Run `npm install` and rebuild your Vite assets after installation. The adapter binds the preset's login, registration, and deletion buttons to Fortify's canonical passkey endpoints; it does not reimplement WebAuthn.
 
 ## Configuration
 
@@ -99,6 +105,18 @@ TURNSTILE_URL=https://challenges.cloudflare.com/turnstile/v0/siteverify
 ```
 
 Turnstile applies only to the web registration, forgot-password, and reset-password submissions. Login and API requests are not challenged.
+
+### Passkey frontend
+
+Passkey support requires both Fortify's server-side routes and the official browser client. Enabling passkeys with the installer performs the frontend wiring automatically:
+
+```bash
+php artisan laranail:authkit.install --passkeys --model='App\\Models\\User'
+npm install
+npm run build
+```
+
+The generated `resources/js/passkeys.js` uses `@laravel/passkeys` for login, registration, and credential deletion. Keep `resources/js/app.js` in the Vite input list; the preset's Blade layout loads that bundle when the application has a Vite manifest or development server.
 
 Route prefixes and redirects can also be customized through `config/auth-preset.php` or its environment variables:
 
@@ -144,7 +162,7 @@ php artisan vendor:publish --tag=sanctum-migrations
 php artisan migrate
 ```
 
-Only publish the migration groups for features enabled in `config/auth-preset.php`.
+Only publish the migration groups for features enabled in `config/auth-preset.php`. These migrations are published to the application's `database/migrations` directory because their tables belong to the application's database. If the selected model lives in a module, the model location does not alter the schema; move the published files into the module's migration directory only when that module owns and loads its migrations.
 
 ### Routes
 
