@@ -32,6 +32,7 @@
             >
                 Register a passkey
             </button>
+            <p class="mt-3 text-sm text-red-600" data-passkey-register-error hidden></p>
         </div>
 
         <h3 class="text-lg font-semibold text-gray-900">Registered passkeys</h3>
@@ -59,5 +60,7 @@
                 @endforeach
             </ul>
         @endif
+
+        <p class="mt-3 text-sm text-red-600" data-passkey-delete-error hidden></p>
     </div>
 </x-auth-preset::layout>
