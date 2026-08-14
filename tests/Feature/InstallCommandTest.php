@@ -11,7 +11,8 @@ it('offers one feature selection with API, passkeys, and Turnstile choices', fun
 
     expect($command->getDefinition()->hasOption('api'))->toBeTrue()
         ->and($command->getDefinition()->hasOption('passkeys'))->toBeTrue()
-        ->and($command->getDefinition()->hasOption('turnstile'))->toBeTrue();
+        ->and($command->getDefinition()->hasOption('turnstile'))->toBeTrue()
+        ->and($command->getDefinition()->hasOption('guard'))->toBeTrue();
 
     $reflection = new ReflectionClass(InstallCommand::class);
     $inputProperty = $reflection->getParentClass()->getProperty('input');
@@ -28,7 +29,17 @@ it('offers one feature selection with API, passkeys, and Turnstile choices', fun
         'update-passwords',
     ]);
 
+    $guardResolver = $reflection->getMethod('resolveGuard');
+    config()->set('auth.guards', [
+        'web'   => ['driver' => 'session'],
+        'admin' => ['driver' => 'session'],
+    ]);
+    config()->set('auth-preset.guard', 'web');
+
+    expect($guardResolver->invoke($command))->toBe('web');
+
     $inputProperty->setValue($command, new ArrayInput([
+        '--guard'              => 'admin',
         '--api'                => true,
         '--passkeys'           => true,
         '--turnstile'          => true,
@@ -36,6 +47,8 @@ it('offers one feature selection with API, passkeys, and Turnstile choices', fun
         '--password-reset'     => true,
     ], $command->getDefinition()));
     $inputProperty->getValue($command)->setInteractive(false);
+
+    expect($guardResolver->invoke($command))->toBe('admin');
 
     expect($resolver->invoke($command))->toContain('api')
         ->toContain('passkeys')
@@ -226,12 +239,13 @@ it('adds selected social and Turnstile environment variables to both env files w
     file_put_contents($envExamplePath, "APP_KEY=\n");
 
     try {
-        $configurator->invoke($command, ['google', 'linkedin'], true, $envPath, $envExamplePath);
+        $configurator->invoke($command, ['google', 'linkedin'], true, $envPath, $envExamplePath, 'web');
 
         foreach ([$envPath, $envExamplePath] as $path) {
             $contents = file_get_contents($path);
 
             expect($contents)
+                ->toContain('AUTH_PRESET_GUARD=web')
                 ->toContain('AUTH_KIT_GOOGLE_CLIENT_ID=')
                 ->toContain('AUTH_KIT_GOOGLE_CLIENT_SECRET=')
                 ->toContain('AUTH_KIT_GOOGLE_REDIRECT=http://localhost/auth/social/google/callback')
