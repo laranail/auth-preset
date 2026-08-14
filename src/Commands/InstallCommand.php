@@ -57,6 +57,7 @@ class InstallCommand extends Command
     ];
     protected $signature = 'laranail:authkit.install
         {--stack= : The frontend stack to install}
+        {--guard= : The authentication guard to use}
         {--social=* : Social providers to enable (google, facebook, twitter, linkedin, paypal)}
         {--api : Enable API authentication with Sanctum tokens}
         {--password-reset : Enable password reset flow}
@@ -82,6 +83,12 @@ class InstallCommand extends Command
         if ($stack !== 'blade') {
             $this->error('Only the [blade] stack is currently supported.');
 
+            return self::FAILURE;
+        }
+
+        $guard = $this->resolveGuard();
+
+        if ($guard === null) {
             return self::FAILURE;
         }
 
@@ -179,9 +186,47 @@ class InstallCommand extends Command
             $this->line('Optionally add TURNSTILE_URL to override the default Cloudflare verification endpoint.');
         }
 
-        $this->configureEnvironment($socialProviders, $wantsTurnstile);
+        $this->configureEnvironment($socialProviders, $wantsTurnstile, guard: $guard);
 
         return self::SUCCESS;
+    }
+
+    private function resolveGuard(): ?string
+    {
+        $guards = array_keys((array) config('auth.guards', []));
+
+        if (count($guards) === 0) {
+            $this->error('No authentication guards were found in config/auth.php.');
+
+            return null;
+        }
+
+        $requestedGuard = $this->option('guard');
+
+        if ($requestedGuard !== null) {
+            if (! in_array($requestedGuard, $guards, true)) {
+                $this->error("The guard [{$requestedGuard}] is not configured in config/auth.php.");
+
+                return null;
+            }
+
+            return $requestedGuard;
+        }
+
+        $configuredGuard = config('auth-preset.guard', config('auth.defaults.guard'));
+        $defaultGuard = is_string($configuredGuard) && in_array($configuredGuard, $guards, true)
+            ? $configuredGuard
+            : $guards[0];
+
+        if (! $this->input->isInteractive()) {
+            return $defaultGuard;
+        }
+
+        return select(
+            label: 'Which authentication guard would you like to use?',
+            options: array_combine($guards, $guards),
+            default: $defaultGuard,
+        );
     }
 
     /** @return array<int, string> */
@@ -213,6 +258,7 @@ class InstallCommand extends Command
             label: 'Which authentication feature would you like to enable?',
             options: self::AUTHENTICATION_FEATURES,
             default: array_keys(self::AUTHENTICATION_FEATURES),
+            scroll: count(self::AUTHENTICATION_FEATURES),
             info: static fn (string $feature): ?string => self::FEATURE_DESCRIPTIONS[$feature] ?? null,
             hint: 'All features are selected by default. Press space to disable features you do not need.',
         );
@@ -236,9 +282,9 @@ class InstallCommand extends Command
         return multiselect(
             label: 'Which social login providers would you like to enable?',
             options: self::SOCIAL_PROVIDERS,
-            default: array_keys(self::SOCIAL_PROVIDERS),
+            default: ['google'],
             required: false,
-            hint: 'All providers are selected by default. Disable providers you do not plan to configure.',
+            hint: 'Google is selected by default. Enable only the providers you plan to configure.',
         );
     }
 
@@ -578,11 +624,15 @@ class InstallCommand extends Command
     }
 
     /** @param array<int, string> $providers */
-    private function configureEnvironment(array $providers, bool $wantsTurnstile, ?string $envPath = null, ?string $envExamplePath = null): void
+    private function configureEnvironment(array $providers, bool $wantsTurnstile, ?string $envPath = null, ?string $envExamplePath = null, ?string $guard = null): void
     {
         $envPath ??= base_path('.env');
         $envExamplePath ??= base_path('.env.example');
         $variables = [];
+
+        if ($guard !== null) {
+            $variables['AUTH_PRESET_GUARD'] = $guard;
+        }
 
         foreach ($providers as $provider) {
             $upper = Str::upper($provider);

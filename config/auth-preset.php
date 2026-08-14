@@ -81,10 +81,6 @@ return [
     'social' => [
         'providers' => [
             'google',
-            'facebook',
-            'twitter',
-            'linkedin',
-            'paypal',
         ],
     ],
 
