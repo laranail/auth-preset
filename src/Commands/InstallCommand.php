@@ -21,7 +21,6 @@ class InstallCommand extends Command
 
     protected $signature = 'laranail:authkit.install
         {--stack= : The frontend stack to install}
-        {--guard= : The authentication guard to use}
         {--social=* : Social providers to enable (google, facebook, twitter, linkedin, paypal)}
         {--api : Enable API authentication with Sanctum tokens}
         {--password-reset : Enable password reset flow}
@@ -50,11 +49,9 @@ class InstallCommand extends Command
             return self::FAILURE;
         }
 
-        $guard = $this->resolveGuard();
-
-        if ($guard === null) {
-            return self::FAILURE;
-        }
+        $authModel = $this->input->isInteractive()
+            ? $this->resolveAuthModel(false, false, true)
+            : null;
 
         $features = $this->resolveFeatures();
         $socialProviders = $this->resolveSocialProviders(in_array('social', $features, true));
@@ -70,7 +67,13 @@ class InstallCommand extends Command
             $features[] = 'social';
         }
 
-        $authModel = $this->resolveAuthModel($wantsApi, $wantsPasskeys);
+        if (! $this->input->isInteractive()) {
+            $authModel = $this->resolveAuthModel($wantsApi, $wantsPasskeys);
+        } elseif (($wantsApi || $wantsPasskeys) && $authModel === null) {
+            $authModel = $this->resolveAuthModel($wantsApi, $wantsPasskeys);
+        } elseif (! $wantsApi && ! $wantsPasskeys) {
+            $authModel = null;
+        }
 
         if (($wantsApi || $wantsPasskeys) && $authModel === null) {
             return self::FAILURE;
@@ -150,48 +153,11 @@ class InstallCommand extends Command
             $this->line('Optionally add TURNSTILE_URL to override the default Cloudflare verification endpoint.');
         }
 
-        $this->configureEnvironment($socialProviders, $wantsTurnstile, guard: $guard);
+        $this->configureEnvironment($socialProviders, $wantsTurnstile);
 
         return self::SUCCESS;
     }
 
-    private function resolveGuard(): ?string
-    {
-        $guards = array_keys((array) config('auth.guards', []));
-
-        if (count($guards) === 0) {
-            $this->error('No authentication guards were found in config/auth.php.');
-
-            return null;
-        }
-
-        $requestedGuard = $this->option('guard');
-
-        if ($requestedGuard !== null) {
-            if (! in_array($requestedGuard, $guards, true)) {
-                $this->error("The guard [{$requestedGuard}] is not configured in config/auth.php.");
-
-                return null;
-            }
-
-            return $requestedGuard;
-        }
-
-        $configuredGuard = config('auth-preset.guard', config('auth.defaults.guard'));
-        $defaultGuard = is_string($configuredGuard) && in_array($configuredGuard, $guards, true)
-            ? $configuredGuard
-            : $guards[0];
-
-        if (! $this->input->isInteractive()) {
-            return $defaultGuard;
-        }
-
-        return prompter()->select(
-            label: 'Which authentication guard would you like to use?',
-            options: array_combine($guards, $guards),
-            default: $defaultGuard,
-        )->getResult();
-    }
 
     /** @return array<int, string> */
     private function resolveFeatures(): array
@@ -285,15 +251,19 @@ class InstallCommand extends Command
         return SocialProvider::labels();
     }
 
-    private function resolveAuthModel(bool $wantsApi, bool $wantsPasskeys): ?string
+    private function resolveAuthModel(bool $wantsApi, bool $wantsPasskeys, bool $promptWithoutFeatures = false): ?string
     {
-        if (! $wantsApi && ! $wantsPasskeys) {
+        if (! $promptWithoutFeatures && ! $wantsApi && ! $wantsPasskeys) {
             return null;
         }
 
         $models = $this->eloquentAuthModels();
 
         if (count($models) === 0) {
+            if ($promptWithoutFeatures) {
+                return null;
+            }
+
             $this->error('Sanctum and passkeys require an Eloquent authentication model. No Eloquent auth provider was found in config/auth.php.');
 
             return null;
@@ -328,7 +298,7 @@ class InstallCommand extends Command
         }
 
         return prompter()->select(
-            label: 'Which Eloquent model should receive the authentication traits?',
+            label: 'Which auth provider should receive the authentication traits?',
             options: $options,
             default: array_key_first($models),
         )->getResult();
@@ -621,15 +591,11 @@ class InstallCommand extends Command
     }
 
     /** @param array<int, string> $providers */
-    private function configureEnvironment(array $providers, bool $wantsTurnstile, ?string $envPath = null, ?string $envExamplePath = null, ?string $guard = null): void
+    private function configureEnvironment(array $providers, bool $wantsTurnstile, ?string $envPath = null, ?string $envExamplePath = null): void
     {
         $envPath ??= base_path('.env');
         $envExamplePath ??= base_path('.env.example');
         $variables = [];
-
-        if ($guard !== null) {
-            $variables['AUTH_PRESET_GUARD'] = $guard;
-        }
 
         foreach ($providers as $provider) {
             $upper = Str::upper($provider);

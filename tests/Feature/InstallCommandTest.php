@@ -12,7 +12,7 @@ it('offers one feature selection with API, passkeys, and Turnstile choices', fun
     expect($command->getDefinition()->hasOption('api'))->toBeTrue()
         ->and($command->getDefinition()->hasOption('passkeys'))->toBeTrue()
         ->and($command->getDefinition()->hasOption('turnstile'))->toBeTrue()
-        ->and($command->getDefinition()->hasOption('guard'))->toBeTrue();
+        ->and($command->getDefinition()->hasOption('guard'))->toBeFalse();
 
     $reflection = new ReflectionClass(InstallCommand::class);
     $inputProperty = $reflection->getParentClass()->getProperty('input');
@@ -29,17 +29,7 @@ it('offers one feature selection with API, passkeys, and Turnstile choices', fun
         'update-passwords',
     ]);
 
-    $guardResolver = $reflection->getMethod('resolveGuard');
-    config()->set('auth.guards', [
-        'web'   => ['driver' => 'session'],
-        'admin' => ['driver' => 'session'],
-    ]);
-    config()->set('auth-preset.guard', 'web');
-
-    expect($guardResolver->invoke($command))->toBe('web');
-
     $inputProperty->setValue($command, new ArrayInput([
-        '--guard'              => 'admin',
         '--api'                => true,
         '--passkeys'           => true,
         '--turnstile'          => true,
@@ -47,8 +37,6 @@ it('offers one feature selection with API, passkeys, and Turnstile choices', fun
         '--password-reset'     => true,
     ], $command->getDefinition()));
     $inputProperty->getValue($command)->setInteractive(false);
-
-    expect($guardResolver->invoke($command))->toBe('admin');
 
     expect($resolver->invoke($command))->toContain('api')
         ->toContain('passkeys')
@@ -78,8 +66,12 @@ it('uses the laranail console prompter for interactive selections', function ():
         ->and(prompter()->getPrompts()->has('select'))->toBeTrue()
         ->and(prompter()->getPrompts()->has('multiselect'))->toBeTrue()
         ->and($source)->not->toContain('Laravel\\Prompts')
-        ->and(mb_substr_count($source, 'prompter()->select'))->toBe(3)
+        ->and(mb_substr_count($source, 'prompter()->select'))->toBe(2)
         ->and(mb_substr_count($source, 'prompter()->multiselect'))->toBe(2);
+
+    expect($source)->toContain('Which auth provider should receive the authentication traits?')
+        ->and(mb_strpos($source, '$authModel = $this->input->isInteractive()'))
+        ->toBeLessThan(mb_strpos($source, '$features = $this->resolveFeatures()'));
 });
 
 it('writes the selected feature set without retaining deselected features', function (): void {
@@ -264,13 +256,12 @@ it('adds selected social and Turnstile environment variables to both env files w
     file_put_contents($envExamplePath, "APP_KEY=\n");
 
     try {
-        $configurator->invoke($command, ['google', 'linkedin'], true, $envPath, $envExamplePath, 'web');
+        $configurator->invoke($command, ['google', 'linkedin'], true, $envPath, $envExamplePath);
 
         foreach ([$envPath, $envExamplePath] as $path) {
             $contents = file_get_contents($path);
 
             expect($contents)
-                ->toContain('AUTH_PRESET_GUARD=web')
                 ->toContain('AUTH_KIT_GOOGLE_CLIENT_ID=')
                 ->toContain('AUTH_KIT_GOOGLE_CLIENT_SECRET=')
                 ->toContain('AUTH_KIT_GOOGLE_REDIRECT=http://localhost/auth/social/google/callback')
@@ -279,6 +270,7 @@ it('adds selected social and Turnstile environment variables to both env files w
                 ->toContain('AUTH_KIT_LINKEDIN_REDIRECT=http://localhost/auth/social/linkedin/callback')
                 ->toContain('TURNSTILE_SITE_KEY=')
                 ->toContain('TURNSTILE_SECRET_KEY=')
+                ->not->toContain('AUTH_PRESET_GUARD=')
                 ->not->toContain('TURNSTILE_URL=');
         }
 
