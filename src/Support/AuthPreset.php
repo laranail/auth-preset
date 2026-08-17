@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\AuthPreset\Support;
 
 use LogicException;
+use Illuminate\Support\Facades\Validator;
+use Simtabi\Laranail\Auth\Enums\SocialProvider;
+use Simtabi\Laranail\Enumerator\Rules\EnumValue;
 use Simtabi\Laranail\AuthPreset\Enums\FrontendStack;
 
 class AuthPreset
@@ -70,7 +73,14 @@ class AuthPreset
 
         return array_values(array_filter(
             array: $providers,
-            callback: function (string $provider): bool {
+            callback: function (mixed $provider): bool {
+                if (! is_string($provider) || ! Validator::make(
+                    data: ['provider' => $provider],
+                    rules: ['provider' => [new EnumValue(SocialProvider::class)]],
+                )->passes()) {
+                    return false;
+                }
+
                 return (bool) config(key: "auth-kit.social.{$provider}.client_id");
             },
         ));
