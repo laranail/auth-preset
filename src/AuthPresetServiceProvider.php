@@ -6,12 +6,35 @@ namespace Simtabi\Laranail\AuthPreset;
 
 use Illuminate\Http\Request;
 use Laravel\Fortify\Fortify;
-use Illuminate\Support\ServiceProvider;
+use Simtabi\Laranail\Package\Tools\Package;
 use Simtabi\Laranail\AuthPreset\Commands\InstallCommand;
+use Simtabi\Laranail\Package\Tools\Providers\PackageServiceProvider;
 
-class AuthPresetServiceProvider extends ServiceProvider
+class AuthPresetServiceProvider extends PackageServiceProvider
 {
-    public function register(): void
+    public function configurePackage(Package $package): void
+    {
+        $package
+            ->name('laranail/auth-preset')
+            ->publish(
+                ['config/auth-preset.php' => config_path('auth-preset.php')],
+                'auth-preset-config',
+            )
+            ->publish(
+                ['routes/web.php' => base_path('routes/auth-preset-web.php')],
+                'auth-preset-routes',
+            )
+            ->publish(
+                ['routes/api.php' => base_path('routes/auth-preset-api.php')],
+                'auth-preset-routes',
+            )
+            ->publish(
+                ['resources/views/blade' => resource_path('views/vendor/auth-preset')],
+                'auth-preset-views',
+            );
+    }
+
+    public function packageRegistered(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/auth-preset.php', 'auth-preset');
 
@@ -21,9 +44,8 @@ class AuthPresetServiceProvider extends ServiceProvider
         );
     }
 
-    public function boot(): void
+    public function packageBooted(): void
     {
-        $this->registerPublishes();
         $this->registerCommands();
         $this->loadViews();
         $this->registerFortifyViews();
@@ -55,34 +77,6 @@ class AuthPresetServiceProvider extends ServiceProvider
         if (Features::enabled(Features::emailVerification())) {
             Fortify::verifyEmailView(fn () => view(Support\AuthPreset::view('verify-email')));
         }
-    }
-
-    private function registerPublishes(): void
-    {
-        if (! $this->app->runningInConsole()) {
-            return;
-        }
-
-        $this->publishes(
-            [__DIR__ . '/../config/auth-preset.php' => config_path('auth-preset.php')],
-            'auth-preset-config'
-        );
-
-        $this->publishes(
-            [__DIR__ . '/../routes/web.php' => base_path('routes/auth-preset-web.php')],
-            'auth-preset-routes'
-        );
-
-        $this->publishes(
-            [__DIR__ . '/../routes/api.php' => base_path('routes/auth-preset-api.php')],
-            'auth-preset-routes'
-        );
-
-        $this->publishes(
-            [__DIR__ . '/../resources/views/blade' => resource_path('views/vendor/auth-preset')],
-            'auth-preset-views'
-        );
-
     }
 
     private function registerCommands(): void
