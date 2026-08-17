@@ -7,13 +7,7 @@ namespace Simtabi\Laranail\AuthPreset\Commands;
 use ReflectionClass;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
-
-use function Laravel\Prompts\select;
-
 use Illuminate\Database\Eloquent\Model;
-
-use function Laravel\Prompts\multiselect;
-
 use Illuminate\Support\Facades\Validator;
 use Simtabi\Laranail\Auth\Enums\SocialProvider;
 use Simtabi\Laranail\Enumerator\Rules\EnumValue;
@@ -44,11 +38,11 @@ class InstallCommand extends Command
 
     public function handle(): int
     {
-        $stack = $this->option('stack') ?? select(
+        $stack = $this->option('stack') ?? prompter()->select(
             label: 'Which frontend stack would you like to install?',
             options: ['blade' => 'Blade'],
             default: 'blade',
-        );
+        )->getResult();
 
         if ($stack !== 'blade') {
             $this->error('Only the [blade] stack is currently supported.');
@@ -192,11 +186,11 @@ class InstallCommand extends Command
             return $defaultGuard;
         }
 
-        return select(
+        return prompter()->select(
             label: 'Which authentication guard would you like to use?',
             options: array_combine($guards, $guards),
             default: $defaultGuard,
-        );
+        )->getResult();
     }
 
     /** @return array<int, string> */
@@ -227,14 +221,14 @@ class InstallCommand extends Command
         $featureDescriptions = $this->featureDescriptions();
         $authenticationFeatures = $this->authenticationFeatures();
 
-        $features = multiselect(
+        $features = prompter()->multiselect(
             label: 'Which authentication feature would you like to enable?',
             options: $authenticationFeatures,
             default: array_keys($authenticationFeatures),
             scroll: count($authenticationFeatures),
             info: static fn (string $feature): ?string => $featureDescriptions[$feature] ?? null,
             hint: 'All features are selected by default. Press space to disable features you do not need.',
-        );
+        )->getResult();
 
         return array_values(array_unique(array_merge($features, $explicit)));
     }
@@ -258,13 +252,13 @@ class InstallCommand extends Command
             return [];
         }
 
-        return multiselect(
+        return prompter()->multiselect(
             label: 'Which social login providers would you like to enable?',
             options: $this->socialProviders(),
             default: ['google'],
             required: false,
             hint: 'Google is selected by default. Enable only the providers you plan to configure.',
-        );
+        )->getResult();
     }
 
     /** @return array<string, string> */
@@ -333,11 +327,11 @@ class InstallCommand extends Command
             $options[$model] = $model . ' (' . implode(', ', $providers) . ')';
         }
 
-        return select(
+        return prompter()->select(
             label: 'Which Eloquent model should receive the authentication traits?',
             options: $options,
             default: array_key_first($models),
-        );
+        )->getResult();
     }
 
     /** @return array<string, array<int, string>> */
