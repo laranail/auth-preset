@@ -23,7 +23,8 @@
         "laravel/framework": "^13.0",
         "laranail/auth-kit": "dev-main",
         "laranail/console": "dev-main",
-        "laranail/enumerator": "dev-main"
+        "laranail/enumerator": "dev-main",
+        "laranail/package-tools": "dev-main"
     },
     "require-dev": {
         "pestphp/pest": "^4.0",
@@ -80,6 +81,10 @@
         {
             "type": "vcs",
             "url": "https://github.com/laranail/enumerator.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/laranail/package-tools.git"
         }
     ],
     "archive": {
