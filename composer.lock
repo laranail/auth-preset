@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cfb886381379b8ebc54e7eed563be732",
+    "content-hash": "05773e32f16322abdf64e79d97ab8644",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1370,6 +1370,177 @@
                 "issues": "https://github.com/laranail/auth-kit/issues"
             },
             "time": "2026-08-14T08:05:28+00:00"
+        },
+        {
+            "name": "laranail/console",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laranail/console.git",
+                "reference": "80abd5a834fd8a5570939475fe153e64ab805eb9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laranail/console/zipball/80abd5a834fd8a5570939475fe153e64ab805eb9",
+                "reference": "80abd5a834fd8a5570939475fe153e64ab805eb9",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "illuminate/console": "^13.0",
+                "illuminate/contracts": "^13.0",
+                "illuminate/support": "^13.0",
+                "laravel/prompts": "^0.3.18|^1.0",
+                "php": "^8.4.1 || ^8.5",
+                "symfony/console": "^8.0"
+            },
+            "replace": {
+                "laranail/console-tools": "*",
+                "laranail/prompter": "*"
+            },
+            "require-dev": {
+                "infection/infection": "^0.34",
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.18",
+                "mockery/mockery": "^1.6",
+                "orchestra/testbench": "^11.0",
+                "pestphp/pest": "^4.0",
+                "phpbench/phpbench": "^1.4",
+                "phpstan/phpstan": "^2.0",
+                "phpunit/phpunit": "^12.0",
+                "rector/rector": "^2.0",
+                "roave/security-advisories": "dev-latest",
+                "symfony/tui": "^8.2@dev"
+            },
+            "suggest": {
+                "symfony/tui": "(experimental, PHP >= 8.4.1) Enables the full-screen TUI integration — Console::tui() + Console\\Tui\\RenderableWidget."
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "0.1.x-dev"
+                },
+                "laravel": {
+                    "providers": [
+                        "Simtabi\\Laranail\\Console\\Providers\\ConsoleServiceProvider"
+                    ],
+                    "aliases": {
+                        "Console": "Simtabi\\Laranail\\Console\\Facades\\Console",
+                        "Prompter": "Simtabi\\Laranail\\Console\\Prompter\\Facades\\PrompterFacade"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Simtabi\\Laranail\\Console\\": "src/Console/"
+                },
+                "files": [
+                    "helpers/helpers.php"
+                ]
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Simtabi\\Laranail\\Console\\Tools\\Tests\\": "tests/Tools/",
+                    "Simtabi\\Laranail\\Console\\Prompter\\Tests\\": "tests/Prompter/",
+                    "Simtabi\\Laranail\\Console\\Progress\\Tests\\": "tests/Progress/",
+                    "Simtabi\\Laranail\\Console\\Benchmarks\\": "benchmarks/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "vendor/bin/pest --no-coverage --colors=always"
+                ],
+                "bench": [
+                    "vendor/bin/phpbench run --report=aggregate"
+                ],
+                "test-coverage": [
+                    "vendor/bin/pest --coverage --colors=always"
+                ],
+                "test-dirty": [
+                    "@test --dirty --compact"
+                ],
+                "examples": [
+                    "php examples/tools/widgets.php > /dev/null",
+                    "php examples/tools/design_system.php > /dev/null",
+                    "php examples/tools/colors.php > /dev/null",
+                    "php examples/tools/typography.php > /dev/null",
+                    "php examples/tools/markdown.php > /dev/null",
+                    "php examples/tools/theming.php > /dev/null",
+                    "php examples/tools/barchart.php > /dev/null",
+                    "php examples/tools/charts.php > /dev/null",
+                    "php examples/tools/emoji.php > /dev/null",
+                    "php examples/tools/symbols.php > /dev/null",
+                    "php examples/tools/writing.php > /dev/null 2>&1",
+                    "php examples/tools/interactive.php > /dev/null",
+                    "php examples/tools/menu.php > /dev/null",
+                    "php examples/tools/tui.php > /dev/null",
+                    "php examples/prompter/validators.php > /dev/null"
+                ],
+                "lint": [
+                    "@pint",
+                    "@phpstan",
+                    "@rector"
+                ],
+                "pint": [
+                    "vendor/bin/pint --test"
+                ],
+                "pint-fix": [
+                    "vendor/bin/pint"
+                ],
+                "phpstan": [
+                    "vendor/bin/phpstan analyse --no-progress"
+                ],
+                "rector": [
+                    "vendor/bin/rector process --dry-run"
+                ],
+                "rector-fix": [
+                    "vendor/bin/rector process"
+                ],
+                "audit": [
+                    "@composer-audit"
+                ],
+                "composer-audit": [
+                    "@composer audit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Simtabi LLC",
+                    "email": "opensource@simtabi.com",
+                    "homepage": "https://opensource.simtabi.com",
+                    "role": "Organization"
+                },
+                {
+                    "name": "Imani Manyara",
+                    "email": "imani@simtabi.com",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "A Rich-class console toolkit for Laravel — fluent output formatter, spinners, progress bars, boxes, trees and tables, plus a fluent prompts/forms layer with validators.",
+            "homepage": "https://opensource.simtabi.com/products/laranail/console",
+            "keywords": [
+                "artisan",
+                "console",
+                "formatter",
+                "forms",
+                "laranail",
+                "laravel",
+                "progress",
+                "prompts",
+                "spinner",
+                "terminal",
+                "tui"
+            ],
+            "support": {
+                "issues": "https://github.com/laranail/console/issues",
+                "source": "https://github.com/laranail/console",
+                "docs": "https://opensource.simtabi.com/documentation/laranail/console/"
+            },
+            "time": "2026-08-15T07:40:05+00:00"
         },
         {
             "name": "laranail/enumerator",
@@ -11809,6 +11980,7 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "laranail/auth-kit": 20,
+        "laranail/console": 20,
         "laranail/enumerator": 20
     },
     "prefer-stable": true,

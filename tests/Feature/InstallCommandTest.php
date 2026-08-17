@@ -71,6 +71,17 @@ it('uses Enumerator feature metadata for interactive feature choices', function 
         ->toBe('Adds OAuth callback routes for the providers selected next.');
 });
 
+it('uses the laranail console prompter for interactive selections', function (): void {
+    $source = file_get_contents(dirname(__DIR__, 2) . '/src/Commands/InstallCommand.php');
+
+    expect(function_exists('prompter'))->toBeTrue()
+        ->and(prompter()->getPrompts()->has('select'))->toBeTrue()
+        ->and(prompter()->getPrompts()->has('multiselect'))->toBeTrue()
+        ->and($source)->not->toContain('Laravel\\Prompts')
+        ->and(mb_substr_count($source, 'prompter()->select'))->toBe(3)
+        ->and(mb_substr_count($source, 'prompter()->multiselect'))->toBe(2);
+});
+
 it('writes the selected feature set without retaining deselected features', function (): void {
     $command = Artisan::all()['laranail:authkit.install'];
     $reflection = new ReflectionClass(InstallCommand::class);
