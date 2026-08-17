@@ -14,47 +14,17 @@ use Illuminate\Database\Eloquent\Model;
 
 use function Laravel\Prompts\multiselect;
 
+use Illuminate\Support\Facades\Validator;
+use Simtabi\Laranail\Auth\Enums\SocialProvider;
+use Simtabi\Laranail\Enumerator\Rules\EnumValue;
+use Simtabi\Laranail\AuthPreset\Enums\AuthenticationFeature;
+
 class InstallCommand extends Command
 {
     private const TAILWIND_BLADE_SOURCE = "@source '../../vendor/laravel/laranail/**/*.blade.php';";
 
     private const PASSKEYS_NPM_PACKAGE = '@laravel/passkeys';
 
-    private const AUTHENTICATION_FEATURES = [
-        'login'                      => 'Login',
-        'registration'               => 'Registration',
-        'logout'                     => 'Logout',
-        'update-profile-information' => 'Profile information updates',
-        'update-passwords'           => 'Password updates',
-        'social'                     => 'Social login',
-        'api'                        => 'API authentication',
-        'password-reset'             => 'Password reset',
-        'email-verification'         => 'Email verification',
-        'passkeys'                   => 'Passkey authentication',
-        'turnstile'                  => 'Cloudflare Turnstile',
-    ];
-
-    private const FEATURE_DESCRIPTIONS = [
-        'login'                      => 'Adds the web login form and authentication endpoint.',
-        'registration'               => 'Adds the web registration form and account creation endpoint.',
-        'logout'                     => 'Adds the web logout endpoint for authenticated users.',
-        'update-profile-information' => 'Adds the authenticated profile information form and endpoint.',
-        'update-passwords'           => 'Adds the authenticated password update form and endpoint.',
-        'social'                     => 'Adds OAuth callback routes for the providers selected next.',
-        'api'                        => 'Adds Sanctum token authentication routes and publishes its migration.',
-        'password-reset'             => 'Adds forgot-password and reset-password views and routes.',
-        'email-verification'         => 'Sends and verifies registration email addresses through Fortify.',
-        'passkeys'                   => 'Adds passkey routes, migration, and the official browser client.',
-        'turnstile'                  => 'Protects your frontend forms from bots with Cloudflare Turnstile.',
-    ];
-
-    private const SOCIAL_PROVIDERS = [
-        'google'   => 'Google',
-        'facebook' => 'Facebook',
-        'twitter'  => 'X (Twitter)',
-        'linkedin' => 'LinkedIn',
-        'paypal'   => 'PayPal',
-    ];
     protected $signature = 'laranail:authkit.install
         {--stack= : The frontend stack to install}
         {--guard= : The authentication guard to use}
@@ -254,12 +224,15 @@ class InstallCommand extends Command
             ], $explicit)));
         }
 
+        $featureDescriptions = $this->featureDescriptions();
+        $authenticationFeatures = $this->authenticationFeatures();
+
         $features = multiselect(
             label: 'Which authentication feature would you like to enable?',
-            options: self::AUTHENTICATION_FEATURES,
-            default: array_keys(self::AUTHENTICATION_FEATURES),
-            scroll: count(self::AUTHENTICATION_FEATURES),
-            info: static fn (string $feature): ?string => self::FEATURE_DESCRIPTIONS[$feature] ?? null,
+            options: $authenticationFeatures,
+            default: array_keys($authenticationFeatures),
+            scroll: count($authenticationFeatures),
+            info: static fn (string $feature): ?string => $featureDescriptions[$feature] ?? null,
             hint: 'All features are selected by default. Press space to disable features you do not need.',
         );
 
@@ -272,7 +245,13 @@ class InstallCommand extends Command
         $optionProviders = $this->option('social');
 
         if (count($optionProviders) > 0) {
-            return array_values(array_intersect($optionProviders, array_keys(self::SOCIAL_PROVIDERS)));
+            return array_values(array_filter(
+                $optionProviders,
+                static fn (mixed $provider): bool => is_string($provider) && Validator::make(
+                    data: ['provider' => $provider],
+                    rules: ['provider' => [new EnumValue(SocialProvider::class)]],
+                )->passes(),
+            ));
         }
 
         if (! $featureSelected || ! $this->input->isInteractive()) {
@@ -281,11 +260,35 @@ class InstallCommand extends Command
 
         return multiselect(
             label: 'Which social login providers would you like to enable?',
-            options: self::SOCIAL_PROVIDERS,
+            options: $this->socialProviders(),
             default: ['google'],
             required: false,
             hint: 'Google is selected by default. Enable only the providers you plan to configure.',
         );
+    }
+
+    /** @return array<string, string> */
+    private function authenticationFeatures(): array
+    {
+        return AuthenticationFeature::labels();
+    }
+
+    /** @return array<string, string> */
+    private function featureDescriptions(): array
+    {
+        $descriptions = [];
+
+        foreach (AuthenticationFeature::cases() as $feature) {
+            $descriptions[$feature->value] = $feature->description() ?? '';
+        }
+
+        return $descriptions;
+    }
+
+    /** @return array<string, string> */
+    private function socialProviders(): array
+    {
+        return SocialProvider::labels();
     }
 
     private function resolveAuthModel(bool $wantsApi, bool $wantsPasskeys): ?string

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\AuthPreset;
 
+use Simtabi\Laranail\AuthPreset\Enums\AuthenticationFeature;
+
 final class Features
 {
     public static function enabled(string $feature): bool
@@ -13,56 +15,56 @@ final class Features
 
     public static function login(): string
     {
-        return 'login';
+        return AuthenticationFeature::LOGIN->value;
     }
 
     public static function registration(): string
     {
-        return 'registration';
+        return AuthenticationFeature::REGISTRATION->value;
     }
 
     public static function logout(): string
     {
-        return 'logout';
+        return AuthenticationFeature::LOGOUT->value;
     }
 
     public static function social(): string
     {
-        return 'social';
+        return AuthenticationFeature::SOCIAL->value;
     }
 
     public static function api(): string
     {
-        return 'api';
+        return AuthenticationFeature::API->value;
     }
 
     public static function passwordReset(): string
     {
-        return 'password-reset';
+        return AuthenticationFeature::PASSWORD_RESET->value;
     }
 
     public static function updateProfileInformation(): string
     {
-        return 'update-profile-information';
+        return AuthenticationFeature::UPDATE_PROFILE_INFORMATION->value;
     }
 
     public static function updatePasswords(): string
     {
-        return 'update-passwords';
+        return AuthenticationFeature::UPDATE_PASSWORDS->value;
     }
 
     public static function emailVerification(): string
     {
-        return 'email-verification';
+        return AuthenticationFeature::EMAIL_VERIFICATION->value;
     }
 
     public static function passkeys(): string
     {
-        return 'passkeys';
+        return AuthenticationFeature::PASSKEYS->value;
     }
 
     public static function turnstile(): string
     {
-        return 'turnstile';
+        return AuthenticationFeature::TURNSTILE->value;
     }
 }

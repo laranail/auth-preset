@@ -57,6 +57,20 @@ it('offers one feature selection with API, passkeys, and Turnstile choices', fun
         ->toContain('password-reset');
 });
 
+it('uses Enumerator feature metadata for interactive feature choices', function (): void {
+    $command = Artisan::all()['laranail:authkit.install'];
+    $reflection = new ReflectionClass(InstallCommand::class);
+    $features = $reflection->getMethod('authenticationFeatures');
+    $descriptions = $reflection->getMethod('featureDescriptions');
+
+    expect($features->invoke($command))->toMatchArray([
+        'login'  => 'Login',
+        'social' => 'Social login',
+    ])
+        ->and($descriptions->invoke($command)['social'])
+        ->toBe('Adds OAuth callback routes for the providers selected next.');
+});
+
 it('writes the selected feature set without retaining deselected features', function (): void {
     $command = Artisan::all()['laranail:authkit.install'];
     $reflection = new ReflectionClass(InstallCommand::class);
