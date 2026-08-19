@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9e61e1680293d4e8ecd2403158ecb844",
+    "content-hash": "75c7a5b843bd5243bf0ac766bc6a1b1b",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -119,6 +119,63 @@
                 }
             ],
             "time": "2026-06-14T18:21:03+00:00"
+        },
+        {
+            "name": "brick/money",
+            "version": "0.14.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/brick/money.git",
+                "reference": "5381a1a6b896d8d57205cbeb8ee01560094a0ca5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/brick/money/zipball/5381a1a6b896d8d57205cbeb8ee01560094a0ca5",
+                "reference": "5381a1a6b896d8d57205cbeb8ee01560094a0ca5",
+                "shasum": ""
+            },
+            "require": {
+                "brick/math": "~0.15.0 || ~0.16.0 || ~0.17.0 || ~0.18.0 || ~0.19.0",
+                "php": "^8.2",
+                "psr/simple-cache": "^2.0 || ^3.0"
+            },
+            "require-dev": {
+                "brick/varexporter": "0.7.0",
+                "ext-dom": "*",
+                "ext-pdo": "*",
+                "phpstan/phpstan": "2.1.40",
+                "phpunit/phpunit": "^11.0"
+            },
+            "suggest": {
+                "ext-intl": "Required to format Money objects"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Brick\\Money\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Money and currency library",
+            "keywords": [
+                "brick",
+                "currency",
+                "money"
+            ],
+            "support": {
+                "issues": "https://github.com/brick/money/issues",
+                "source": "https://github.com/brick/money/tree/0.14.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/BenMorel",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-07-30T22:32:40+00:00"
         },
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -1192,26 +1249,26 @@
         },
         {
             "name": "guzzlehttp/uri-template",
-            "version": "v1.0.10",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/uri-template.git",
-                "reference": "f6c24c21f42b990e9a58912b332d0874df6ba839"
+                "reference": "516c3bf2af176c532d5b59b3430292f7e9ecccb1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/uri-template/zipball/f6c24c21f42b990e9a58912b332d0874df6ba839",
-                "reference": "f6c24c21f42b990e9a58912b332d0874df6ba839",
+                "url": "https://api.github.com/repos/guzzle/uri-template/zipball/516c3bf2af176c532d5b59b3430292f7e9ecccb1",
+                "reference": "516c3bf2af176c532d5b59b3430292f7e9ecccb1",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.2.5 || ^8.0",
+                "php": "^7.4 || ^8.0",
                 "symfony/polyfill-php80": "^1.25"
             },
             "require-dev": {
                 "bamarni/composer-bin-plugin": "^1.8.2",
-                "phpunit/phpunit": "^8.5.52 || ^9.6.34",
-                "uri-template/tests": "1.0.0"
+                "phpunit/phpunit": "^9.6.34",
+                "uri-template/tests": "1.0.2"
             },
             "type": "library",
             "extra": {
@@ -1258,7 +1315,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/uri-template/issues",
-                "source": "https://github.com/guzzle/uri-template/tree/v1.0.10"
+                "source": "https://github.com/guzzle/uri-template/tree/v2.0.0"
             },
             "funding": [
                 {
@@ -1274,7 +1331,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-07-17T13:53:03+00:00"
+            "time": "2026-07-20T13:40:43+00:00"
         },
         {
             "name": "laranail/auth-kit",
@@ -1370,6 +1427,155 @@
                 "issues": "https://github.com/laranail/auth-kit/issues"
             },
             "time": "2026-08-14T08:05:28+00:00"
+        },
+        {
+            "name": "laranail/captcha",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laranail/captcha.git",
+                "reference": "a40c1f3f51f567e3f8a2e06fec9ae7cce8e48868"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laranail/captcha/zipball/a40c1f3f51f567e3f8a2e06fec9ae7cce8e48868",
+                "reference": "a40c1f3f51f567e3f8a2e06fec9ae7cce8e48868",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/cache": "^13.0",
+                "illuminate/console": "^13.0",
+                "illuminate/contracts": "^13.0",
+                "illuminate/database": "^13.0",
+                "illuminate/http": "^13.0",
+                "illuminate/routing": "^13.0",
+                "illuminate/support": "^13.0",
+                "illuminate/translation": "^13.0",
+                "illuminate/validation": "^13.0",
+                "illuminate/view": "^13.0",
+                "laranail/console": "^0.1",
+                "laranail/db-tools": "^0.7",
+                "laranail/enumerator": "^0.1",
+                "laranail/package-tools": "^0.1",
+                "php": "^8.4.1 || ^8.5",
+                "psr/clock": "^1.0",
+                "psr/log": "^3.0"
+            },
+            "require-dev": {
+                "altcha-org/altcha": "^2.1",
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.18",
+                "mockery/mockery": "^1.6",
+                "orchestra/testbench": "^11.0",
+                "pestphp/pest": "^4.0",
+                "pestphp/pest-plugin-arch": "^4.0",
+                "pestphp/pest-plugin-laravel": "^4.0",
+                "phpstan/phpstan": "^2.0",
+                "rector/rector": "^2.0",
+                "roave/security-advisories": "dev-latest",
+                "symfony/process": "^7.0 || ^8.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "0.1.x-dev"
+                },
+                "laravel": {
+                    "providers": [
+                        "Simtabi\\Laranail\\Captcha\\Providers\\CaptchaServiceProvider"
+                    ],
+                    "aliases": {
+                        "Captcha": "Simtabi\\Laranail\\Captcha\\Facades\\Captcha"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Simtabi\\Laranail\\Captcha\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Simtabi\\Laranail\\Captcha\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "vendor/bin/pest --colors=always"
+                ],
+                "test-coverage": [
+                    "@test --coverage"
+                ],
+                "test-dirty": [
+                    "@test --dirty --compact"
+                ],
+                "lint": [
+                    "@pint",
+                    "@phpstan",
+                    "@rector"
+                ],
+                "pint": [
+                    "vendor/bin/pint --test"
+                ],
+                "pint-fix": [
+                    "vendor/bin/pint"
+                ],
+                "phpstan": [
+                    "vendor/bin/phpstan analyse --no-progress"
+                ],
+                "rector": [
+                    "vendor/bin/rector process --dry-run"
+                ],
+                "rector-fix": [
+                    "vendor/bin/rector process"
+                ],
+                "audit": [
+                    "@composer audit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Simtabi LLC",
+                    "email": "opensource@simtabi.com",
+                    "homepage": "https://opensource.simtabi.com",
+                    "role": "Organization"
+                },
+                {
+                    "name": "Imani Manyara",
+                    "email": "imani@simtabi.com",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "Rahul Dey",
+                    "email": "rahul900day@gmail.com",
+                    "role": "Original author of rahul900day/laravel-captcha"
+                }
+            ],
+            "description": "One captcha contract for Laravel across Turnstile, hCaptcha, every reCAPTCHA version, Friendly Captcha, Arkose Labs and self-hosted ALTCHA — with environment-scoped credentials, a database-backed settings store, and an edge bot-management middleware.",
+            "homepage": "https://opensource.simtabi.com/products/laranail/captcha",
+            "keywords": [
+                "altcha",
+                "arkose",
+                "bot-management",
+                "captcha",
+                "friendly-captcha",
+                "hcaptcha",
+                "laranail",
+                "laravel",
+                "recaptcha",
+                "spam-protection",
+                "turnstile"
+            ],
+            "support": {
+                "issues": "https://github.com/laranail/captcha/issues",
+                "source": "https://github.com/laranail/captcha",
+                "docs": "https://opensource.simtabi.com/documentation/laranail/captcha/"
+            },
+            "time": "2026-08-15T07:39:55+00:00"
         },
         {
             "name": "laranail/console",
@@ -1541,6 +1747,141 @@
                 "docs": "https://opensource.simtabi.com/documentation/laranail/console/"
             },
             "time": "2026-08-15T07:40:05+00:00"
+        },
+        {
+            "name": "laranail/db-tools",
+            "version": "v0.7.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laranail/db-tools.git",
+                "reference": "ac4b3d63f29d8b4bb39209f29fa13d5ce4df7686"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laranail/db-tools/zipball/ac4b3d63f29d8b4bb39209f29fa13d5ce4df7686",
+                "reference": "ac4b3d63f29d8b4bb39209f29fa13d5ce4df7686",
+                "shasum": ""
+            },
+            "require": {
+                "brick/money": "^0.13 || ^0.14",
+                "illuminate/database": "^13.0",
+                "illuminate/support": "^13.0",
+                "php": "^8.4.1 || ^8.5",
+                "ramsey/uuid": "^4.7",
+                "spatie/laravel-sluggable": "^4.0",
+                "symfony/uid": "^7.0 || ^8.0"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.18",
+                "mockery/mockery": "^1.6",
+                "orchestra/testbench": "^11.0",
+                "pestphp/pest": "^4.0",
+                "phpstan/phpstan": "^2.0",
+                "phpunit/phpunit": "^12.5",
+                "rector/rector": "^2.5.8",
+                "roave/security-advisories": "dev-latest"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "0.7.x-dev"
+                },
+                "laravel": {
+                    "providers": [
+                        "Simtabi\\Laranail\\DbTools\\Providers\\DbToolsServiceProvider"
+                    ],
+                    "aliases": {
+                        "DbTools": "Simtabi\\Laranail\\DbTools\\Facades\\DbToolsFacade"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Simtabi\\Laranail\\DbTools\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Simtabi\\Laranail\\DbTools\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "setup": [
+                    "bash .scripts/init.sh"
+                ],
+                "test": [
+                    "vendor/bin/pest --colors=always --no-coverage"
+                ],
+                "test-coverage": [
+                    "vendor/bin/pest --colors=always --coverage"
+                ],
+                "test-dirty": [
+                    "@test --dirty --compact"
+                ],
+                "lint": [
+                    "@pint",
+                    "@phpstan",
+                    "@rector"
+                ],
+                "pint": [
+                    "vendor/bin/pint --test"
+                ],
+                "pint-fix": [
+                    "vendor/bin/pint"
+                ],
+                "phpstan": [
+                    "vendor/bin/phpstan analyse --no-progress"
+                ],
+                "rector": [
+                    "vendor/bin/rector process --dry-run"
+                ],
+                "rector-fix": [
+                    "vendor/bin/rector process"
+                ],
+                "audit": [
+                    "@composer audit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Simtabi LLC",
+                    "email": "opensource@simtabi.com",
+                    "homepage": "https://opensource.simtabi.com",
+                    "role": "Organization"
+                },
+                {
+                    "name": "Imani Manyara",
+                    "email": "imani@simtabi.com",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "Independent Laravel database utilities — model traits (UUID/NanoID/ULID, audit log, soft-deletes-with-undo, soft-archive, JSON accessors, inheritance-friendly fillable/hidden/casts/defaults), casts (money, datetime), schema macros & field groups, backup/restore, a database CLI command, connection & table inspection, a session read-model, and cursor + offset pagination.",
+            "homepage": "https://opensource.simtabi.com/products/laranail/db-tools",
+            "keywords": [
+                "audit",
+                "backup",
+                "cli",
+                "database",
+                "laranail",
+                "laravel",
+                "nanoid",
+                "pagination",
+                "schema-macros",
+                "soft-archive",
+                "soft-deletes",
+                "ulid",
+                "uuid"
+            ],
+            "support": {
+                "issues": "https://github.com/laranail/db-tools/issues",
+                "source": "https://github.com/laranail/db-tools",
+                "docs": "https://opensource.simtabi.com/documentation/laranail/db-tools/"
+            },
+            "time": "2026-08-14T13:13:54+00:00"
         },
         {
             "name": "laranail/enumerator",
@@ -1898,16 +2239,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v13.25.0",
+            "version": "v13.26.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "ed36fe882bd4eed4e6ff75343cbad8dbda03fdba"
+                "reference": "e4a1bc52ef551d52e60244bb004256d6861da7ab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/ed36fe882bd4eed4e6ff75343cbad8dbda03fdba",
-                "reference": "ed36fe882bd4eed4e6ff75343cbad8dbda03fdba",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/e4a1bc52ef551d52e60244bb004256d6861da7ab",
+                "reference": "e4a1bc52ef551d52e60244bb004256d6861da7ab",
                 "shasum": ""
             },
             "require": {
@@ -1924,9 +2265,10 @@
                 "ext-session": "*",
                 "ext-tokenizer": "*",
                 "fruitcake/php-cors": "^1.3",
-                "guzzlehttp/guzzle": "^7.8.2",
-                "guzzlehttp/promises": "^2.0.3",
-                "guzzlehttp/uri-template": "^1.0",
+                "guzzlehttp/guzzle": "^7.8.2 || ^8.0",
+                "guzzlehttp/promises": "^2.0.3 || ^3.0",
+                "guzzlehttp/psr7": "^2.9 || ^3.0",
+                "guzzlehttp/uri-template": "^1.0 || ^2.0",
                 "laravel/prompts": "^0.3.11",
                 "laravel/serializable-closure": "^2.0.10",
                 "league/commonmark": "^2.8.1",
@@ -1938,6 +2280,7 @@
                 "nunomaduro/termwind": "^2.0",
                 "php": "^8.3",
                 "psr/container": "^1.1.1 || ^2.0.1",
+                "psr/http-message": "^1.0 || ^2.0",
                 "psr/log": "^1.0 || ^2.0 || ^3.0",
                 "psr/simple-cache": "^1.0 || ^2.0 || ^3.0",
                 "ramsey/uuid": "^4.7",
@@ -2012,7 +2355,6 @@
                 "aws/aws-sdk-php": "^3.322.9",
                 "ext-gmp": "*",
                 "fakerphp/faker": "^1.24",
-                "guzzlehttp/psr7": "^2.9",
                 "intervention/image": "^4.0",
                 "laravel/pint": "^1.18",
                 "league/flysystem-aws-s3-v3": "^3.25.1",
@@ -2062,7 +2404,6 @@
                 "php-http/discovery": "Required to use PSR-7 bridging features (^1.15).",
                 "phpunit/phpunit": "Required to use assertions and run tests (^11.5.50 || ^12.5.8 || ^13.0.3).",
                 "predis/predis": "Required to use the predis connector (^2.3 || ^3.0).",
-                "psr/http-message": "Required to allow Storage::put to accept a StreamInterface (^1.0).",
                 "pusher/pusher-php-server": "Required to use the Pusher broadcast driver (^6.0 || ^7.0).",
                 "resend/resend-php": "Required to enable support for the Resend mail transport (^0.10.0 || ^1.0).",
                 "spatie/fork": "Required to use the 'fork' concurrency driver (^1.2).",
@@ -2121,7 +2462,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2026-08-11T13:56:22+00:00"
+            "time": "2026-08-18T20:31:28+00:00"
         },
         {
             "name": "laravel/passkeys",
@@ -2193,16 +2534,16 @@
         },
         {
             "name": "laravel/prompts",
-            "version": "v0.3.22",
+            "version": "v0.3.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/prompts.git",
-                "reference": "02b89b39e8972a998db4d5d4ad4719239dd4aee4"
+                "reference": "b7b4c35e5bc47450f6b6238c6cc9c47ba19b2221"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/prompts/zipball/02b89b39e8972a998db4d5d4ad4719239dd4aee4",
-                "reference": "02b89b39e8972a998db4d5d4ad4719239dd4aee4",
+                "url": "https://api.github.com/repos/laravel/prompts/zipball/b7b4c35e5bc47450f6b6238c6cc9c47ba19b2221",
+                "reference": "b7b4c35e5bc47450f6b6238c6cc9c47ba19b2221",
                 "shasum": ""
             },
             "require": {
@@ -2246,9 +2587,9 @@
             "description": "Add beautiful and user-friendly forms to your command-line applications.",
             "support": {
                 "issues": "https://github.com/laravel/prompts/issues",
-                "source": "https://github.com/laravel/prompts/tree/v0.3.22"
+                "source": "https://github.com/laravel/prompts/tree/v0.3.23"
             },
-            "time": "2026-08-04T14:50:50+00:00"
+            "time": "2026-08-11T18:58:24+00:00"
         },
         {
             "name": "laravel/sanctum",
@@ -3291,16 +3632,16 @@
         },
         {
             "name": "nette/schema",
-            "version": "v1.3.5",
+            "version": "v1.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nette/schema.git",
-                "reference": "f0ab1a3cda782dbc5da270d28545236aa80c4002"
+                "reference": "c54350438cd6914616f790a49cb424605f421562"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nette/schema/zipball/f0ab1a3cda782dbc5da270d28545236aa80c4002",
-                "reference": "f0ab1a3cda782dbc5da270d28545236aa80c4002",
+                "url": "https://api.github.com/repos/nette/schema/zipball/c54350438cd6914616f790a49cb424605f421562",
+                "reference": "c54350438cd6914616f790a49cb424605f421562",
                 "shasum": ""
             },
             "require": {
@@ -3352,9 +3693,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nette/schema/issues",
-                "source": "https://github.com/nette/schema/tree/v1.3.5"
+                "source": "https://github.com/nette/schema/tree/v1.3.6"
             },
-            "time": "2026-02-23T03:47:12+00:00"
+            "time": "2026-08-16T21:58:41+00:00"
         },
         {
             "name": "nette/utils",
@@ -4808,6 +5149,84 @@
                 "source": "https://github.com/socialiteproviders/manager"
             },
             "time": "2026-08-16T00:16:22+00:00"
+        },
+        {
+            "name": "spatie/laravel-sluggable",
+            "version": "4.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/laravel-sluggable.git",
+                "reference": "572933c61b70103be4b95fe7674070bb60243254"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/laravel-sluggable/zipball/572933c61b70103be4b95fe7674070bb60243254",
+                "reference": "572933c61b70103be4b95fe7674070bb60243254",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "^12.0|^13.0",
+                "illuminate/support": "^12.0|^13.0",
+                "php": "^8.3"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.24",
+                "orchestra/testbench": "^10.0|^11.0",
+                "pestphp/pest": "^4.0",
+                "spatie/laravel-translatable": "^6.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "SelfHealing": "Spatie\\Sluggable\\Facades\\SelfHealing"
+                    },
+                    "providers": [
+                        "Spatie\\Sluggable\\SluggableServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\Sluggable\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Generate slugs when saving Eloquent models",
+            "homepage": "https://github.com/spatie/laravel-sluggable",
+            "keywords": [
+                "eloquent",
+                "laravel",
+                "laravel-sluggable",
+                "self-healing",
+                "slug",
+                "slugs",
+                "spatie",
+                "translatable"
+            ],
+            "support": {
+                "issues": "https://github.com/spatie/laravel-sluggable/issues",
+                "source": "https://github.com/spatie/laravel-sluggable/tree/4.0.3"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/spatie",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-07-28T13:16:49+00:00"
         },
         {
             "name": "spomky-labs/cbor-php",
@@ -12129,6 +12548,7 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "laranail/auth-kit": 20,
+        "laranail/captcha": 20,
         "laranail/console": 20,
         "laranail/enumerator": 20,
         "laranail/package-tools": 20

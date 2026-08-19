@@ -2,7 +2,7 @@
 
 Blade authentication scaffolding for Laravel 13+, powered by [`laranail/auth-kit`](https://github.com/laranail/auth-kit).
 
-The preset provides configurable web and API authentication routes, Fortify-backed password and profile flows, Blade views, social login integration, passkeys, and optional Cloudflare Turnstile validation.
+The preset provides configurable web and API authentication routes, Fortify-backed password and profile flows, Blade views, social login integration, passkeys, and optional captcha-based bot protection.
 
 ## Requirements
 
@@ -47,7 +47,7 @@ php artisan laranail:authkit.install \
     --api \
     --passkeys \
     --model='App\Models\User' \
-    --turnstile \
+    --bot-protection \
     --social=google \
     --social=linkedin
 ```
@@ -63,7 +63,7 @@ Available options:
 | `--email-verification` | Enable email verification. |
 | `--passkeys` | Enable passkey authentication, migration, and browser client. |
 | `--model=<class>` | Select the Eloquent auth model to configure for Sanctum and/or passkeys. |
-| `--turnstile` | Enable Turnstile validation on registration and password-reset forms. |
+| `--bot-protection` | Enable captcha validation on registration and password-reset forms. |
 | `--publish-routes` | Publish route files for application ownership. |
 | `--publish-views` | Publish Blade views for application customization. |
 | `--force` | Overwrite existing published files. |
@@ -80,8 +80,8 @@ When passkeys are enabled, the installer adds `@laravel/passkeys` to `package.js
 
 The installer publishes both configuration files:
 
-- `config/auth-kit.php` contains backend authentication, Fortify, social, and Turnstile settings.
-- `config/auth-preset.php` controls the frontend stack, enabled features, route prefixes, middleware, guard, and redirects.
+- `config/auth-kit.php` contains backend authentication, Fortify, and social settings.
+- `config/auth-preset.php` controls the frontend stack, bot-protection provider, enabled features, route prefixes, middleware, guard, and redirects.
 
 Enable or disable preset features in `config/auth-preset.php`:
 
@@ -95,16 +95,15 @@ Enable or disable preset features in `config/auth-preset.php`:
 ],
 ```
 
-Turnstile is disabled by default. When enabled with `Features::turnstile()`, add the Cloudflare credentials to `.env`:
+Bot protection is disabled by default. When enabled with `Features::botProtection()`, the preset uses `laranail/captcha` and defaults to Turnstile. Credentials always resolve from configuration, never the database:
 
 ```env
-TURNSTILE_SITE_KEY=
-TURNSTILE_SECRET_KEY=
-# Optional: override Cloudflare's siteverify endpoint.
-TURNSTILE_URL=https://challenges.cloudflare.com/turnstile/v0/siteverify
+CAPTCHA_PROVIDER=turnstile
+CAPTCHA_SITE_KEY=
+CAPTCHA_SECRET_KEY=
 ```
 
-Turnstile applies only to the web registration, forgot-password, and reset-password submissions. Login and API requests are not challenged.
+Set `CAPTCHA_PROVIDER` to any provider supported by `laranail/captcha`; the Blade markup and validation remain unchanged. Bot protection applies only to the web registration, forgot-password, and reset-password submissions. Login and API requests are not challenged.
 
 ### Passkey frontend
 

@@ -62,6 +62,10 @@ return [
         'api' => ['api', 'throttle:60,1'],
     ],
 
+    'bot_protection' => [
+        'provider' => env(key: 'CAPTCHA_PROVIDER', default: 'turnstile'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Redirects
