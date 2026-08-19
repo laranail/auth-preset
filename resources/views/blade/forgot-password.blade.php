@@ -23,7 +23,6 @@
                     name="email"
                     type="email"
                     :value="old('email')"
-                    required
                     autofocus
                     autocomplete="email"
                     placeholder="you@example.com"

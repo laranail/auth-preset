@@ -16,7 +16,6 @@
                     name="email"
                     type="email"
                     :value="old('email', $request->email)"
-                    required
                     autofocus
                     autocomplete="email"
                     placeholder="you@example.com"
@@ -33,7 +32,6 @@
                     id="password"
                     name="password"
                     type="password"
-                    required
                     autocomplete="new-password"
                     placeholder="Enter your new password"
                     :error="$errors->has('password')"
@@ -49,7 +47,6 @@
                     id="password_confirmation"
                     name="password_confirmation"
                     type="password"
-                    required
                     autocomplete="new-password"
                     placeholder="Confirm your new password"
                     :error="$errors->has('password_confirmation')"

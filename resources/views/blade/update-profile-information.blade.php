@@ -17,7 +17,6 @@
                     name="name"
                     type="text"
                     :value="old('name', $user->name)"
-                    required
                     autofocus
                     autocomplete="name"
                     placeholder="John Doe"
@@ -35,7 +34,6 @@
                     name="email"
                     type="email"
                     :value="old('email', $user->email)"
-                    required
                     autocomplete="email"
                     placeholder="you@example.com"
                     :error="$profileErrors->has('email')"

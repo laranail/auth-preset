@@ -24,7 +24,6 @@
                     name="email"
                     type="email"
                     :value="old('email')"
-                    required
                     autofocus
                     autocomplete="email webauthn"
                     placeholder="you@example.com"
@@ -41,7 +40,6 @@
                     id="password"
                     name="password"
                     type="password"
-                    required
                     autocomplete="current-password"
                     placeholder="Enter your password"
                     :error="$errors->has('password')"
@@ -56,6 +54,7 @@
                     id="remember"
                     name="remember"
                     type="checkbox"
+                    value="1"
                     {{ old('remember') ? 'checked' : '' }}
                     class="size-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
                 >

@@ -24,7 +24,6 @@
                     name="name"
                     type="text"
                     :value="old('name')"
-                    required
                     autofocus
                     autocomplete="name"
                     placeholder="John Doe"
@@ -42,7 +41,6 @@
                     name="email"
                     type="email"
                     :value="old('email')"
-                    required
                     autocomplete="email"
                     placeholder="you@example.com"
                     :error="$errors->has('email')"
@@ -58,7 +56,6 @@
                     id="password"
                     name="password"
                     type="password"
-                    required
                     autocomplete="new-password"
                     placeholder="At least 8 characters"
                     :error="$errors->has('password')"
@@ -74,7 +71,6 @@
                     id="password_confirmation"
                     name="password_confirmation"
                     type="password"
-                    required
                     autocomplete="new-password"
                     placeholder="Re-enter your password"
                     :error="$errors->has('password_confirmation')"

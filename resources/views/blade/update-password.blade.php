@@ -16,7 +16,6 @@
                     id="current_password"
                     name="current_password"
                     type="password"
-                    required
                     autofocus
                     autocomplete="current-password"
                     placeholder="Enter your current password"
@@ -33,7 +32,6 @@
                     id="password"
                     name="password"
                     type="password"
-                    required
                     autocomplete="new-password"
                     placeholder="Enter your new password"
                     :error="$passwordErrors->has('password')"
@@ -49,7 +47,6 @@
                     id="password_confirmation"
                     name="password_confirmation"
                     type="password"
-                    required
                     autocomplete="new-password"
                     placeholder="Re-enter your new password"
                     :error="$passwordErrors->has('password_confirmation')"
