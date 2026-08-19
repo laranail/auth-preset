@@ -3,8 +3,6 @@
         <h2 class="text-2xl font-bold tracking-tight text-gray-900">Set a new password</h2>
     </div>
 
-    <x-auth-preset::validation-errors :errors="$errors" />
-
     <form method="POST" action="{{ route('password.update') }}" class="space-y-6">
         @csrf
 
