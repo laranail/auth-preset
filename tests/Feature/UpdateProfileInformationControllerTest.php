@@ -41,6 +41,7 @@ it(description: 'renders the profile information form for authenticated users', 
         ->get(route('user-profile-information.edit'))
         ->assertOk()
         ->assertViewIs('auth-preset::blade.update-profile-information')
+        ->assertSee(route('dashboard'))
         ->assertSee('Ada Lovelace')
         ->assertSee('ada@example.com');
 });

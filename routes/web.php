@@ -7,6 +7,10 @@ use Simtabi\Laranail\AuthPreset\Features;
 use Simtabi\Laranail\AuthPreset\Support\AuthPreset;
 use Simtabi\Laranail\AuthPreset\Http\Controllers\Auth;
 
+Route::middleware([...AuthPreset::webMiddleware(), 'auth:' . AuthPreset::guard()])
+    ->get('/dashboard', fn () => view(AuthPreset::view('dashboard'), ['user' => request()->user()]))
+    ->name('dashboard');
+
 Route::prefix(AuthPreset::webPrefix())
     ->middleware([...AuthPreset::webMiddleware(), 'guest:' . AuthPreset::guard()])
     ->group(function (): void {

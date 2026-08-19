@@ -5,6 +5,14 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Simtabi\Laranail\AuthPreset\Features;
 
+it(description: 'registers the dashboard route', closure: function (): void {
+    $route = Route::getRoutes()->getByName('dashboard');
+
+    expect($route)->not->toBeNull()
+        ->and($route->uri())->toBe('dashboard')
+        ->and($route->gatherMiddleware())->toContain('auth:' . config('auth-preset.guard'));
+});
+
 it(description: 'registers login, registration, and API routes when features are enabled', closure: function (): void {
     $routes = Route::getRoutes()->getRoutesByName();
 
