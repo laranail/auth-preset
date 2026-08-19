@@ -5,8 +5,6 @@
         <p class="mt-2 text-sm text-gray-600">Choose a new password for your account.</p>
     </div>
 
-    <x-auth-preset::validation-errors :errors="$passwordErrors" />
-
     <form method="POST" action="{{ route('user-password.update') }}" class="space-y-6">
         @csrf
         @method('PUT')

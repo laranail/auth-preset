@@ -5,8 +5,6 @@
         <p class="mt-2 text-sm text-gray-600">Keep your account information up to date.</p>
     </div>
 
-    <x-auth-preset::validation-errors :errors="$profileErrors" />
-
     <form method="POST" action="{{ route('user-profile-information.update') }}" class="space-y-6">
         @csrf
         @method('PUT')

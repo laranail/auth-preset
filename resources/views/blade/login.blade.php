@@ -11,8 +11,6 @@
         </p>
     </div>
 
-    <x-auth-preset::validation-errors :errors="$errors" />
-
     <x-auth-preset::social-buttons />
 
     <form method="POST" action="{{ route('login') }}" class="space-y-6">
