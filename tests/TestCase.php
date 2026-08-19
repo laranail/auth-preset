@@ -8,6 +8,7 @@ use Simtabi\Laranail\AuthPreset\Features;
 use Simtabi\Laranail\Auth\AuthKitServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Simtabi\Laranail\AuthPreset\AuthPresetServiceProvider;
+use Simtabi\Laranail\Captcha\Providers\CaptchaServiceProvider;
 
 abstract class TestCase extends OrchestraTestCase
 {
@@ -18,6 +19,7 @@ abstract class TestCase extends OrchestraTestCase
             \Laravel\Fortify\FortifyServiceProvider::class,
             \Laravel\Sanctum\SanctumServiceProvider::class,
             AuthKitServiceProvider::class,
+            CaptchaServiceProvider::class,
             AuthPresetServiceProvider::class,
         ];
     }

@@ -26,7 +26,7 @@ class InstallCommand extends Command
         {--password-reset : Enable password reset flow}
         {--email-verification : Enable email verification flow}
         {--passkeys : Enable passkey authentication, migration, and browser client}
-        {--turnstile : Enable Cloudflare Turnstile validation on guest forms}
+        {--bot-protection : Enable configurable captcha validation on guest forms}
         {--model= : The Eloquent authentication model to configure}
         {--publish-routes : Publish package route files for application ownership}
         {--publish-controllers : Reserved for a future controller publishing workflow}
@@ -59,7 +59,7 @@ class InstallCommand extends Command
         $wantsPasswordReset = in_array('password-reset', $features, true);
         $wantsEmailVerification = in_array('email-verification', $features, true);
         $wantsPasskeys = in_array('passkeys', $features, true);
-        $wantsTurnstile = in_array('turnstile', $features, true);
+        $wantsBotProtection = in_array('bot-protection', $features, true);
 
         if (count($socialProviders) === 0) {
             $features = array_values(array_diff($features, ['social']));
@@ -146,14 +146,14 @@ class InstallCommand extends Command
             $this->line('Set your OAuth credentials in .env for each enabled provider.');
         }
 
-        if ($wantsTurnstile) {
+        if ($wantsBotProtection) {
             $this->newLine();
-            $this->info('Turnstile validation enabled for guest forms.');
-            $this->line('Add TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY to your .env file.');
-            $this->line('Optionally add TURNSTILE_URL to override the default Cloudflare verification endpoint.');
+            $this->info('Bot protection enabled for guest forms.');
+            $this->line('Turnstile is the default provider. Set CAPTCHA_PROVIDER to use another supported provider.');
+            $this->line('Add CAPTCHA_SITE_KEY and CAPTCHA_SECRET_KEY to your .env file when the selected provider requires credentials.');
         }
 
-        $this->configureEnvironment($socialProviders, $wantsTurnstile);
+        $this->configureEnvironment($socialProviders, $wantsBotProtection);
 
         return self::SUCCESS;
     }
@@ -164,7 +164,7 @@ class InstallCommand extends Command
     {
         $explicit = [];
 
-        foreach (['api', 'password-reset', 'email-verification', 'passkeys', 'turnstile'] as $feature) {
+        foreach (['api', 'password-reset', 'email-verification', 'passkeys', 'bot-protection'] as $feature) {
             if ($this->input->hasParameterOption('--' . $feature)) {
                 $explicit[] = $feature;
             }
@@ -561,7 +561,7 @@ class InstallCommand extends Command
             'password-reset'             => 'passwordReset',
             'email-verification'         => 'emailVerification',
             'passkeys'                   => 'passkeys',
-            'turnstile'                  => 'turnstile',
+            'bot-protection'             => 'botProtection',
         ];
         $featureLines = [];
 
@@ -591,7 +591,7 @@ class InstallCommand extends Command
     }
 
     /** @param array<int, string> $providers */
-    private function configureEnvironment(array $providers, bool $wantsTurnstile, ?string $envPath = null, ?string $envExamplePath = null): void
+    private function configureEnvironment(array $providers, bool $wantsBotProtection, ?string $envPath = null, ?string $envExamplePath = null): void
     {
         $envPath ??= base_path('.env');
         $envExamplePath ??= base_path('.env.example');
@@ -604,9 +604,10 @@ class InstallCommand extends Command
             $variables["AUTH_KIT_{$upper}_REDIRECT"] = url("/auth/social/{$provider}/callback");
         }
 
-        if ($wantsTurnstile) {
-            $variables['TURNSTILE_SITE_KEY'] = '';
-            $variables['TURNSTILE_SECRET_KEY'] = '';
+        if ($wantsBotProtection) {
+            $variables['CAPTCHA_PROVIDER'] = 'turnstile';
+            $variables['CAPTCHA_SITE_KEY'] = '';
+            $variables['CAPTCHA_SECRET_KEY'] = '';
         }
 
         if (count($variables) === 0) {

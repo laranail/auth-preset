@@ -33,8 +33,8 @@
             <x-auth-preset::input-error :message="$errors->first('email')" />
         </div>
 
-        @if (\Simtabi\Laranail\AuthPreset\Features::enabled(\Simtabi\Laranail\AuthPreset\Features::turnstile()))
-            <x-auth-preset::turnstile />
+        @if (\Simtabi\Laranail\AuthPreset\Features::enabled(\Simtabi\Laranail\AuthPreset\Features::botProtection()))
+            <x-captcha />
         @endif
 
         <div>

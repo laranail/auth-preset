@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Laravel\Fortify\Fortify;
 use Simtabi\Laranail\Package\Tools\Package;
 use Simtabi\Laranail\AuthPreset\Commands\InstallCommand;
+use Simtabi\Laranail\AuthPreset\Http\Middleware\ValidateCaptcha;
 use Simtabi\Laranail\Package\Tools\Providers\PackageServiceProvider;
 
 class AuthPresetServiceProvider extends PackageServiceProvider
@@ -38,10 +39,10 @@ class AuthPresetServiceProvider extends PackageServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/auth-preset.php', 'auth-preset');
 
-        config()->set(
-            key: 'auth-kit.turnstile.enabled',
-            value: Features::enabled(Features::turnstile()),
-        );
+        config()->set('auth-kit.turnstile.enabled', false);
+        config()->set('laranail.captcha.provider', config('auth-preset.bot_protection.provider', 'turnstile'));
+        config()->set('laranail.captcha.credentials.source', 'config');
+        config()->set('laranail.captcha.credentials.database.enabled', false);
     }
 
     public function packageBooted(): void
@@ -51,7 +52,7 @@ class AuthPresetServiceProvider extends PackageServiceProvider
         $this->registerFortifyViews();
         $this->loadRoutes();
         $this->app->booted(function (): void {
-            $this->registerTurnstileMiddleware();
+            $this->registerCaptchaMiddleware();
         });
     }
 
@@ -110,13 +111,13 @@ class AuthPresetServiceProvider extends PackageServiceProvider
         $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
     }
 
-    private function registerTurnstileMiddleware(): void
+    private function registerCaptchaMiddleware(): void
     {
         foreach (['register.store', 'password.email', 'password.update'] as $name) {
             $route = app('router')->getRoutes()->getByName($name);
 
             if ($route !== null && in_array('web', $route->middleware(), true)) {
-                $route->middleware(\Simtabi\Laranail\Auth\Http\Middleware\ValidateTurnstile::class);
+                $route->middleware(ValidateCaptcha::class);
             }
         }
     }

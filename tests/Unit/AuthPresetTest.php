@@ -26,7 +26,7 @@ it(description: 'can disable a feature by omitting it from the list', closure: f
 });
 
 it('exposes Enumerator metadata for authentication features', function (): void {
-    expect(AuthenticationFeature::values())->toContain('login', 'social', 'turnstile')
+    expect(AuthenticationFeature::values())->toContain('login', 'social', 'bot-protection')
         ->and(AuthenticationFeature::LOGIN->label())->toBe('Login')
         ->and(AuthenticationFeature::SOCIAL->description())
         ->toBe('Adds OAuth callback routes for the providers selected next.')

@@ -6,12 +6,12 @@ use Illuminate\Support\Facades\Artisan;
 use Symfony\Component\Console\Input\ArrayInput;
 use Simtabi\Laranail\AuthPreset\Commands\InstallCommand;
 
-it('offers one feature selection with API, passkeys, and Turnstile choices', function (): void {
+it('offers one feature selection with API, passkeys, and bot protection choices', function (): void {
     $command = Artisan::all()['laranail:authkit.install'];
 
     expect($command->getDefinition()->hasOption('api'))->toBeTrue()
         ->and($command->getDefinition()->hasOption('passkeys'))->toBeTrue()
-        ->and($command->getDefinition()->hasOption('turnstile'))->toBeTrue()
+        ->and($command->getDefinition()->hasOption('bot-protection'))->toBeTrue()
         ->and($command->getDefinition()->hasOption('guard'))->toBeFalse();
 
     $reflection = new ReflectionClass(InstallCommand::class);
@@ -32,7 +32,7 @@ it('offers one feature selection with API, passkeys, and Turnstile choices', fun
     $inputProperty->setValue($command, new ArrayInput([
         '--api'                => true,
         '--passkeys'           => true,
-        '--turnstile'          => true,
+        '--bot-protection'     => true,
         '--email-verification' => true,
         '--password-reset'     => true,
     ], $command->getDefinition()));
@@ -40,7 +40,7 @@ it('offers one feature selection with API, passkeys, and Turnstile choices', fun
 
     expect($resolver->invoke($command))->toContain('api')
         ->toContain('passkeys')
-        ->toContain('turnstile')
+        ->toContain('bot-protection')
         ->toContain('email-verification')
         ->toContain('password-reset');
 });
@@ -93,7 +93,7 @@ it('writes the selected feature set without retaining deselected features', func
             ->toContain('Features::api()')
             ->not->toContain('Features::logout()')
             ->not->toContain('Features::passwordReset()')
-            ->not->toContain('Features::turnstile()');
+            ->not->toContain('Features::botProtection()');
     } finally {
         unlink($configPath);
     }
@@ -245,14 +245,14 @@ it('installs the passkey browser client and app entrypoint idempotently', functi
     }
 });
 
-it('adds selected social and Turnstile environment variables to both env files without overwriting them', function (): void {
+it('adds selected social and captcha environment variables to both env files without overwriting them', function (): void {
     $command = Artisan::all()['laranail:authkit.install'];
     $reflection = new ReflectionClass(InstallCommand::class);
     $configurator = $reflection->getMethod('configureEnvironment');
     $envPath = tempnam(dirname(__DIR__, 2), 'auth-preset-env-');
     $envExamplePath = tempnam(dirname(__DIR__, 2), 'auth-preset-env-example-');
 
-    file_put_contents($envPath, "APP_KEY=existing\nAUTH_KIT_GOOGLE_CLIENT_ID=existing-client\nTURNSTILE_SITE_KEY=existing-site\n");
+    file_put_contents($envPath, "APP_KEY=existing\nAUTH_KIT_GOOGLE_CLIENT_ID=existing-client\nCAPTCHA_SITE_KEY=existing-site\n");
     file_put_contents($envExamplePath, "APP_KEY=\n");
 
     try {
@@ -268,21 +268,22 @@ it('adds selected social and Turnstile environment variables to both env files w
                 ->toContain('AUTH_KIT_LINKEDIN_CLIENT_ID=')
                 ->toContain('AUTH_KIT_LINKEDIN_CLIENT_SECRET=')
                 ->toContain('AUTH_KIT_LINKEDIN_REDIRECT=http://localhost/auth/social/linkedin/callback')
-                ->toContain('TURNSTILE_SITE_KEY=')
-                ->toContain('TURNSTILE_SECRET_KEY=')
+                ->toContain('CAPTCHA_PROVIDER=turnstile')
+                ->toContain('CAPTCHA_SITE_KEY=')
+                ->toContain('CAPTCHA_SECRET_KEY=')
                 ->not->toContain('AUTH_PRESET_GUARD=')
-                ->not->toContain('TURNSTILE_URL=');
+                ->not->toContain('CAPTCHA_CREDENTIALS_FROM_DATABASE=');
         }
 
         expect(file_get_contents($envPath))
             ->toContain('AUTH_KIT_GOOGLE_CLIENT_ID=existing-client')
-            ->toContain('TURNSTILE_SITE_KEY=existing-site')
-            ->and(mb_substr_count(file_get_contents($envPath), 'TURNSTILE_SITE_KEY='))->toBe(1);
+            ->toContain('CAPTCHA_SITE_KEY=existing-site')
+            ->and(mb_substr_count(file_get_contents($envPath), 'CAPTCHA_SITE_KEY='))->toBe(1);
 
         $configurator->invoke($command, ['google', 'linkedin'], true, $envPath, $envExamplePath);
 
         expect(mb_substr_count(file_get_contents($envPath), 'AUTH_KIT_GOOGLE_CLIENT_ID='))->toBe(1)
-            ->and(mb_substr_count(file_get_contents($envExamplePath), 'TURNSTILE_URL='))->toBe(0);
+            ->and(mb_substr_count(file_get_contents($envExamplePath), 'CAPTCHA_PROVIDER='))->toBe(1);
     } finally {
         unlink($envPath);
         unlink($envExamplePath);

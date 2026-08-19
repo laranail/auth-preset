@@ -22,6 +22,7 @@
         "php": "^8.4 | ^8.5",
         "laravel/framework": "^13.0",
         "laranail/auth-kit": "dev-main",
+        "laranail/captcha": "dev-main",
         "laranail/console": "dev-main",
         "laranail/enumerator": "dev-main",
         "laranail/package-tools": "dev-main"
@@ -73,6 +74,14 @@
         {
             "type": "vcs",
             "url": "https://github.com/laranail/auth-kit.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/laranail/captcha.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/laranail/db-tools.git"
         },
         {
             "type": "vcs",

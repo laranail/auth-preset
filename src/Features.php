@@ -63,8 +63,8 @@ final class Features
         return AuthenticationFeature::PASSKEYS->value;
     }
 
-    public static function turnstile(): string
+    public static function botProtection(): string
     {
-        return AuthenticationFeature::TURNSTILE->value;
+        return AuthenticationFeature::BOT_PROTECTION->value;
     }
 }
