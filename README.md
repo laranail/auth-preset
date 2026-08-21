@@ -14,7 +14,42 @@ The preset provides configurable web and API authentication routes, Fortify-back
 
 ## Installation
 
-Install the preset with Composer:
+Laranail packages are not available on Packagist yet. Before requiring the preset, add these VCS repositories to the consuming application's `composer.json`:
+
+```json
+"repositories": [
+    {
+        "type": "vcs",
+        "url": "https://github.com/laranail/auth-kit.git"
+    },
+    {
+        "type": "vcs",
+        "url": "https://github.com/laranail/auth-preset.git"
+    },
+    {
+        "type": "vcs",
+        "url": "https://github.com/laranail/console.git"
+    },
+    {
+        "type": "vcs",
+        "url": "https://github.com/laranail/enumerator.git"
+    },
+    {
+        "type": "vcs",
+        "url": "https://github.com/laranail/package-tools.git"
+    },
+    {
+        "type": "vcs",
+        "url": "https://github.com/laranail/captcha.git"
+    },
+    {
+        "type": "vcs",
+        "url": "https://github.com/laranail/db-tools.git"
+    }
+]
+```
+
+Then install the preset with Composer:
 
 ```bash
 composer require laranail/auth-preset
@@ -39,6 +74,25 @@ After installation, the default web routes are available under `/auth`:
 
 If API authentication is enabled, its routes are available under `/api/auth` and use Sanctum tokens.
 
+## Documentation
+
+- [Installation](docs/installation.md)
+- [Registration](docs/registration.md)
+- [Login](docs/login.md)
+- [Logout](docs/logout.md)
+- [Password reset](docs/password-reset.md)
+- [Profile management](docs/profile-management.md)
+- [Password updates](docs/password-updates.md)
+- [Email verification](docs/email-verification.md)
+- [Social login](docs/social-login.md)
+- [Passkeys](docs/passkeys.md)
+- [API routes](docs/api-routes.md)
+- [Bot protection](docs/bot-protection.md)
+- [Security](docs/security.md)
+- [Testing](docs/testing.md)
+- [Route configuration](docs/route-configuration.md)
+- [Customization](docs/customization.md)
+
 ## Installer options
 
 The installer can be run non-interactively with explicit options:
@@ -57,19 +111,19 @@ php artisan laranail:authkit.install \
 
 Available options:
 
-| Option | Description |
-| --- | --- |
-| `--stack=blade` | Select the frontend stack. Blade is currently supported. |
-| `--social=<provider>` | Enable a supported social provider. Repeat for multiple providers. |
-| `--api` | Enable API authentication and publish the Sanctum token migration. |
-| `--password-reset` | Enable forgot-password and reset-password flows. |
-| `--email-verification` | Enable email verification. |
-| `--passkeys` | Enable passkey authentication, migration, and browser client. |
-| `--model=<class>` | Select the Eloquent auth model to configure for Sanctum and/or passkeys. |
-| `--bot-protection` | Enable captcha validation on registration and password-reset forms. |
-| `--publish-routes` | Publish route files for application ownership. |
-| `--publish-views` | Publish Blade views for application customization. |
-| `--force` | Overwrite existing published files. |
+| Option                 | Description                                                              |
+|------------------------|--------------------------------------------------------------------------|
+| `--stack=blade`        | Select the frontend stack. Blade is currently supported.                 |
+| `--social=<provider>`  | Enable a supported social provider. Repeat for multiple providers.       |
+| `--api`                | Enable API authentication and publish the Sanctum token migration.       |
+| `--password-reset`     | Enable forgot-password and reset-password flows.                         |
+| `--email-verification` | Enable email verification.                                               |
+| `--passkeys`           | Enable passkey authentication, migration, and browser client.            |
+| `--model=<class>`      | Select the Eloquent auth model to configure for Sanctum and/or passkeys. |
+| `--bot-protection`     | Enable captcha validation on registration and password-reset forms.      |
+| `--publish-routes`     | Publish route files for application ownership.                           |
+| `--publish-views`      | Publish Blade views for application customization.                       |
+| `--force`              | Overwrite existing published files.                                      |
 
 Supported social providers are `google`, `facebook`, `twitter`, `linkedin`, and `paypal`.
 
