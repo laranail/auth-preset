@@ -185,7 +185,8 @@ class InstallCommand extends Command
             options: $authenticationFeatures,
             default: array_keys(array: $authenticationFeatures),
             scroll: count(value: $authenticationFeatures),
-            info: static fn (string $feature): ?string => $featureDescriptions[$feature] ?? null,
+            // into seems not to be supported by prompter
+            // info: static fn (string $feature): ?string => $featureDescriptions[$feature] ?? null,
             hint: 'All features are selected by default. Press space to disable features you do not need.',
         )->getResult();
 
