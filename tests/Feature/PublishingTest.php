@@ -5,6 +5,14 @@ declare(strict_types=1);
 use Illuminate\Support\ServiceProvider;
 use Simtabi\Laranail\AuthPreset\AuthPresetServiceProvider;
 
+it('publishes Blade views for application customization', function (): void {
+    $this->artisan('vendor:publish', [
+        '--tag' => 'auth-preset-views',
+    ])->assertSuccessful();
+
+    expect(resource_path('views/vendor/auth-preset/login.blade.php'))->toBeFile();
+});
+
 it('preserves the Auth Preset publish tags and destinations', function (): void {
     $config = ServiceProvider::pathsToPublish(
         provider: AuthPresetServiceProvider::class,
