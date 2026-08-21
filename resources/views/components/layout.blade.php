@@ -3,7 +3,7 @@
     'bodyClass' => 'bg-gray-50 font-sans text-gray-900 antialiased',
     'mainClass' => 'flex min-h-screen items-center justify-center p-4',
     'contentClass' => 'w-full max-w-md',
-    'cardClass' => 'rounded-xl bg-white px-8 py-10 shadow-lg ring-1 ring-gray-950/5',
+    'cardClass' => 'rounded-xl bg-white px-8 py-10 ring-1 ring-gray-950/5',
 ])
 
 <!DOCTYPE html>

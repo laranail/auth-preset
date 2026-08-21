@@ -1,5 +1,5 @@
 <x-auth-preset::dashboard-layout title="Dashboard">
-    <header class="bg-white shadow-sm">
+    <header class="bg-white">
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <h1 class="text-xl font-semibold leading-tight text-gray-800">Dashboard</h1>
         </div>
@@ -7,7 +7,7 @@
 
     <div class="my-4">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+            <div class="overflow-hidden bg-white sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     Welcome back, {{ $user->name }}.
                 </div>

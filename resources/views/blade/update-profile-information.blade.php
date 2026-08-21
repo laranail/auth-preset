@@ -1,7 +1,7 @@
 <x-auth-preset::dashboard-layout title="Update profile information">
     <div class="py-12">
         <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
-            <div class="overflow-hidden bg-white px-8 py-10 shadow-sm sm:rounded-lg">
+            <div class="overflow-hidden bg-white px-8 py-10 sm:rounded-lg">
                 @php($profileErrors = $errors->getBag('updateProfileInformation'))
                 <div class="mb-8">
                     <h1 class="text-2xl font-bold tracking-tight text-gray-900">Update your profile</h1>
@@ -48,7 +48,7 @@
                     <div>
                         <button
                             type="submit"
-                            class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         >
                             Update profile
                         </button>
