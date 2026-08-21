@@ -13,12 +13,24 @@
         data-passkey-registration-options-url="{{ route('passkey.registration-options') }}"
         data-passkey-registration-url="{{ route('passkey.store') }}"
         data-passkey-delete-url-template="{{ route('passkey.destroy', ['passkey' => '__PASSKEY__']) }}"
+        data-passkey-confirmation-options-url="{{ route('passkey.confirm-options') }}"
+        data-passkey-confirmation-url="{{ route('passkey.confirm') }}"
         data-password-confirmation-status-url="{{ route('password.confirmation') }}"
         data-password-confirmation-url="{{ route('password.confirm.store') }}"
     >
         <div class="mb-8 rounded-md border border-gray-200 p-4" data-password-confirmation hidden>
-            <label for="passkey-password" class="block text-sm font-medium text-gray-700">Confirm your password</label>
-            <p class="mt-2 text-sm text-gray-600">Confirm your password before changing your passkeys.</p>
+            <h3 class="text-sm font-medium text-gray-700">Confirm your identity</h3>
+            <p class="mt-2 text-sm text-gray-600">Confirm with an existing passkey or your password before changing your passkeys.</p>
+            <button
+                type="button"
+                class="mt-3 rounded-md border border-indigo-600 px-3 py-2 text-sm font-semibold text-indigo-600 hover:bg-indigo-50"
+                data-passkey-confirm
+            >
+                Confirm with a passkey
+            </button>
+            <p class="mt-3 text-sm text-red-600" data-passkey-confirmation-error hidden></p>
+            <p class="mt-4 text-sm text-gray-600">Use your password if you have not enrolled a passkey yet.</p>
+            <label for="passkey-password" class="mt-3 block text-sm font-medium text-gray-700">Confirm your password</label>
             <input
                 id="passkey-password"
                 name="password"

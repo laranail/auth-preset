@@ -67,13 +67,15 @@ const initializeManagement = (element) => {
     const registerError = element.querySelector('[data-passkey-register-error]');
     const passwordConfirmation = element.querySelector('[data-password-confirmation]');
     const passwordConfirmationError = element.querySelector('[data-password-confirmation-error]');
+    const passkeyConfirmationButton = element.querySelector('[data-passkey-confirm]');
+    const passkeyConfirmationError = element.querySelector('[data-passkey-confirmation-error]');
     const passwordInput = element.querySelector('[data-password-confirmation-input]');
     const routes = {
         options: element.dataset.passkeyRegistrationOptionsUrl,
         submit: element.dataset.passkeyRegistrationUrl,
     };
 
-    const confirmPassword = async () => {
+    const confirmationRequired = async () => {
         const status = await fetch(element.dataset.passwordConfirmationStatusUrl, {
             headers: {
                 Accept: 'application/json',
@@ -81,11 +83,10 @@ const initializeManagement = (element) => {
             },
         });
 
-        if (status.ok && (await status.json()).confirmed) {
-            return;
-        }
+        return !status.ok || !(await status.json()).confirmed;
+    };
 
-        passwordConfirmation.hidden = false;
+    const confirmWithPassword = async () => {
         passwordConfirmationError.hidden = true;
 
         if (!passwordInput.value) {
@@ -120,6 +121,45 @@ const initializeManagement = (element) => {
         throw new Error(message);
     };
 
+    const confirmWithPasskey = async () => {
+        passkeyConfirmationError.hidden = true;
+        passkeyConfirmationButton.disabled = true;
+
+        try {
+            await Passkeys.verify({
+                routes: {
+                    options: element.dataset.passkeyConfirmationOptionsUrl,
+                    submit: element.dataset.passkeyConfirmationUrl,
+                },
+            });
+
+            passwordConfirmation.hidden = true;
+        } catch (exception) {
+            showError(passkeyConfirmationError, exception);
+            passkeyConfirmationButton.disabled = false;
+
+            throw exception;
+        }
+    };
+
+    const confirmIdentity = async () => {
+        if (!await confirmationRequired()) {
+            return;
+        }
+
+        passwordConfirmation.hidden = false;
+
+        if (passwordInput.value) {
+            await confirmWithPassword();
+
+            return;
+        }
+
+        throw new Error('Confirm with a passkey or enter your password before changing your passkeys.');
+    };
+
+    passkeyConfirmationButton?.addEventListener('click', () => confirmWithPasskey().catch(() => {}));
+
     if (!Passkeys.isSupported()) {
         registerButton?.setAttribute('hidden', 'hidden');
     }
@@ -132,7 +172,7 @@ const initializeManagement = (element) => {
         registerButton.disabled = true;
 
         try {
-            await confirmPassword();
+            await confirmIdentity();
             const name = element.querySelector('[data-passkey-name]')?.value?.trim();
 
             handleSuccess(await Passkeys.register({ name, routes }));
@@ -148,7 +188,7 @@ const initializeManagement = (element) => {
             button.disabled = true;
 
             try {
-                await confirmPassword();
+                await confirmIdentity();
                 const response = await fetch(button.dataset.passkeyDeleteUrl, {
                     method: 'DELETE',
                     headers: {

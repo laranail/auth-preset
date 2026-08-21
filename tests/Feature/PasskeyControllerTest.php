@@ -21,8 +21,11 @@ it(description: 'renders an empty passkey management page for authenticated user
         ->assertSee('No passkeys registered yet.')
         ->assertSee(value: route('passkey.registration-options'), escape: false)
         ->assertSee(value: route('passkey.store'), escape: false)
+        ->assertSee(value: route('passkey.confirm-options'), escape: false)
+        ->assertSee(value: route('passkey.confirm'), escape: false)
         ->assertSee(value: route('password.confirmation'), escape: false)
         ->assertSee(value: route('password.confirm.store'), escape: false)
+        ->assertSee(value: 'data-passkey-confirm', escape: false)
         ->assertSee(value: 'data-password-confirmation-input', escape: false)
         ->assertSee(value: 'data-passkey-register-error', escape: false);
 });
