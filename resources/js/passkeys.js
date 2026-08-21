@@ -65,32 +65,23 @@ const initializeLogin = (element) => {
 const initializeManagement = (element) => {
     const registerButton = element.querySelector('[data-passkey-register]');
     const registerError = element.querySelector('[data-passkey-register-error]');
-    const passwordConfirmation = element.querySelector('[data-password-confirmation]');
-    const passwordConfirmationError = element.querySelector('[data-password-confirmation-error]');
-    const passkeyConfirmationButton = element.querySelector('[data-passkey-confirm]');
-    const passkeyConfirmationError = element.querySelector('[data-passkey-confirmation-error]');
-    const passwordInput = element.querySelector('[data-password-confirmation-input]');
+    const registrationPasswordInput = element.querySelector('[data-passkey-registration-password]');
+    const deletionDialog = element.querySelector('[data-passkey-delete-confirmation]');
+    const deletionPasswordInput = element.querySelector('[data-passkey-delete-password]');
+    const deletionConfirmationError = element.querySelector('[data-passkey-delete-confirmation-error]');
+    const deletionConfirmButton = element.querySelector('[data-passkey-delete-confirm]');
+    const deletionCancelButton = element.querySelector('[data-passkey-delete-cancel]');
+    let passkeyToDelete;
     const routes = {
         options: element.dataset.passkeyRegistrationOptionsUrl,
         submit: element.dataset.passkeyRegistrationUrl,
     };
 
-    const confirmationRequired = async () => {
-        const status = await fetch(element.dataset.passwordConfirmationStatusUrl, {
-            headers: {
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-        });
+    const confirmWithPassword = async (input, error) => {
+        error.hidden = true;
 
-        return !status.ok || !(await status.json()).confirmed;
-    };
-
-    const confirmWithPassword = async () => {
-        passwordConfirmationError.hidden = true;
-
-        if (!passwordInput.value) {
-            passwordInput.focus();
+        if (!input.value) {
+            input.focus();
 
             throw new Error('Confirm your password before changing your passkeys.');
         }
@@ -103,11 +94,11 @@ const initializeManagement = (element) => {
                 'X-CSRF-TOKEN': csrfToken,
                 'X-Requested-With': 'XMLHttpRequest',
             },
-            body: JSON.stringify({ password: passwordInput.value }),
+            body: JSON.stringify({ password: input.value }),
         });
 
         if (response.ok) {
-            passwordInput.value = '';
+            input.value = '';
 
             return;
         }
@@ -115,50 +106,11 @@ const initializeManagement = (element) => {
         const payload = await response.json().catch(() => null);
         const message = payload?.errors?.password?.[0] ?? 'Password confirmation failed. Please try again.';
 
-        showError(passwordConfirmationError, new Error(message));
-        passwordInput.focus();
+        showError(error, new Error(message));
+        input.focus();
 
         throw new Error(message);
     };
-
-    const confirmWithPasskey = async () => {
-        passkeyConfirmationError.hidden = true;
-        passkeyConfirmationButton.disabled = true;
-
-        try {
-            await Passkeys.verify({
-                routes: {
-                    options: element.dataset.passkeyConfirmationOptionsUrl,
-                    submit: element.dataset.passkeyConfirmationUrl,
-                },
-            });
-
-            passwordConfirmation.hidden = true;
-        } catch (exception) {
-            showError(passkeyConfirmationError, exception);
-            passkeyConfirmationButton.disabled = false;
-
-            throw exception;
-        }
-    };
-
-    const confirmIdentity = async () => {
-        if (!await confirmationRequired()) {
-            return;
-        }
-
-        passwordConfirmation.hidden = false;
-
-        if (passwordInput.value) {
-            await confirmWithPassword();
-
-            return;
-        }
-
-        throw new Error('Confirm with a passkey or enter your password before changing your passkeys.');
-    };
-
-    passkeyConfirmationButton?.addEventListener('click', () => confirmWithPasskey().catch(() => {}));
 
     if (!Passkeys.isSupported()) {
         registerButton?.setAttribute('hidden', 'hidden');
@@ -172,8 +124,13 @@ const initializeManagement = (element) => {
         registerButton.disabled = true;
 
         try {
-            await confirmIdentity();
             const name = element.querySelector('[data-passkey-name]')?.value?.trim();
+
+            if (!name) {
+                throw new Error('Enter a name for this passkey.');
+            }
+
+            await confirmWithPassword(registrationPasswordInput, registerError);
 
             handleSuccess(await Passkeys.register({ name, routes }));
         } catch (exception) {
@@ -184,30 +141,38 @@ const initializeManagement = (element) => {
 
     element.querySelectorAll('[data-passkey-delete]').forEach((button) => {
         button.addEventListener('click', async () => {
-            const deleteError = element.querySelector('[data-passkey-delete-error]');
-            button.disabled = true;
-
-            try {
-                await confirmIdentity();
-                const response = await fetch(button.dataset.passkeyDeleteUrl, {
-                    method: 'DELETE',
-                    headers: {
-                        Accept: 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Passkey could not be removed. Please try again.');
-                }
-
-                window.location.reload();
-            } catch (exception) {
-                showError(deleteError, exception);
-                button.disabled = false;
-            }
+            passkeyToDelete = button;
+            deletionConfirmationError.hidden = true;
+            deletionDialog.showModal();
+            deletionPasswordInput.focus();
         });
+    });
+
+    deletionCancelButton?.addEventListener('click', () => deletionDialog.close());
+
+    deletionConfirmButton?.addEventListener('click', async () => {
+        deletionConfirmButton.disabled = true;
+
+        try {
+            await confirmWithPassword(deletionPasswordInput, deletionConfirmationError);
+            const response = await fetch(passkeyToDelete.dataset.passkeyDeleteUrl, {
+                method: 'DELETE',
+                headers: {
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Passkey could not be removed. Please try again.');
+            }
+
+            window.location.reload();
+        } catch (exception) {
+            showError(deletionConfirmationError, exception);
+            deletionConfirmButton.disabled = false;
+        }
     });
 };
 

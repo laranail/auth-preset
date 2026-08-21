@@ -13,37 +13,12 @@
         data-passkey-registration-options-url="{{ route('passkey.registration-options') }}"
         data-passkey-registration-url="{{ route('passkey.store') }}"
         data-passkey-delete-url-template="{{ route('passkey.destroy', ['passkey' => '__PASSKEY__']) }}"
-        data-passkey-confirmation-options-url="{{ route('passkey.confirm-options') }}"
-        data-passkey-confirmation-url="{{ route('passkey.confirm') }}"
-        data-password-confirmation-status-url="{{ route('password.confirmation') }}"
         data-password-confirmation-url="{{ route('password.confirm.store') }}"
     >
-        <div class="mb-8 rounded-md border border-gray-200 p-4" data-password-confirmation hidden>
-            <h3 class="text-sm font-medium text-gray-700">Confirm your identity</h3>
-            <p class="mt-2 text-sm text-gray-600">Confirm with an existing passkey or your password before changing your passkeys.</p>
-            <button
-                type="button"
-                class="mt-3 rounded-md border border-indigo-600 px-3 py-2 text-sm font-semibold text-indigo-600 hover:bg-indigo-50"
-                data-passkey-confirm
-            >
-                Confirm with a passkey
-            </button>
-            <p class="mt-3 text-sm text-red-600" data-passkey-confirmation-error hidden></p>
-            <p class="mt-4 text-sm text-gray-600">Use your password if you have not enrolled a passkey yet.</p>
-            <label for="passkey-password" class="mt-3 block text-sm font-medium text-gray-700">Confirm your password</label>
-            <input
-                id="passkey-password"
-                name="password"
-                type="password"
-                autocomplete="current-password"
-                class="mt-3 block w-full rounded-md border-gray-300"
-                data-password-confirmation-input
-            >
-            <p class="mt-3 text-sm text-red-600" data-password-confirmation-error hidden></p>
-        </div>
-
         <div class="mb-8 rounded-md border border-gray-200 p-4">
-            <label for="passkey-name" class="block text-sm font-medium text-gray-700">Passkey name</label>
+            <h3 class="text-lg font-semibold text-gray-900">Add a passkey</h3>
+            <p class="mt-2 text-sm text-gray-600">Choose a name and confirm your password to register a new passkey.</p>
+            <label for="passkey-name" class="mt-4 block text-sm font-medium text-gray-700">Passkey name</label>
             <input
                 id="passkey-name"
                 name="name"
@@ -52,6 +27,15 @@
                 class="mt-2 block w-full rounded-md border-gray-300"
                 placeholder="MacBook Pro"
                 data-passkey-name
+            >
+            <label for="passkey-password" class="mt-4 block text-sm font-medium text-gray-700">Current password</label>
+            <input
+                id="passkey-password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                class="mt-2 block w-full rounded-md border-gray-300"
+                data-passkey-registration-password
             >
             <button
                 type="button"
@@ -89,6 +73,23 @@
             </ul>
         @endif
 
-        <p class="mt-3 text-sm text-red-600" data-passkey-delete-error hidden></p>
+        <dialog class="w-full max-w-md rounded-md border border-gray-200 p-6 text-gray-900 backdrop:bg-gray-900/40" data-passkey-delete-confirmation>
+            <h3 class="text-lg font-semibold">Remove this passkey?</h3>
+            <p class="mt-2 text-sm text-gray-600">Confirm your password to remove this passkey from your account.</p>
+            <label for="passkey-delete-password" class="mt-4 block text-sm font-medium text-gray-700">Current password</label>
+            <input
+                id="passkey-delete-password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                class="mt-2 block w-full rounded-md border-gray-300"
+                data-passkey-delete-password
+            >
+            <p class="mt-3 text-sm text-red-600" data-passkey-delete-confirmation-error hidden></p>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" class="rounded-md border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50" data-passkey-delete-cancel>Cancel</button>
+                <button type="button" class="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-500" data-passkey-delete-confirm>Remove passkey</button>
+            </div>
+        </dialog>
     </div>
 </x-auth-preset::layout>
