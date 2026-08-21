@@ -12,11 +12,15 @@ if (Features::enabled(Features::api())) {
         ->middleware(AuthPreset::apiMiddleware())
         ->group(function (): void {
             if (Features::enabled(Features::registration())) {
-                Route::post('/register', [Api\RegisterController::class, 'store'])->name('api.register');
+                Route::post('/register', [Api\RegisterController::class, 'store'])
+                    ->middleware('throttle:10,1')
+                    ->name('api.register');
             }
 
             if (Features::enabled(Features::login())) {
-                Route::post('/login', [Api\LoginController::class, 'store'])->name('api.login');
+                Route::post('/login', [Api\LoginController::class, 'store'])
+                    ->middleware('throttle:10,1')
+                    ->name('api.login');
             }
 
             if (Features::enabled(Features::logout())) {
@@ -37,9 +41,11 @@ if (Features::enabled(Features::api())) {
 
             if (Features::enabled(Features::passwordReset())) {
                 Route::post('/forgot-password', [Api\PasswordResetLinkController::class, 'store'])
+                    ->middleware('throttle:10,1')
                     ->name('api.password.email');
 
                 Route::post('/reset-password', [Api\NewPasswordController::class, 'store'])
+                    ->middleware('throttle:10,1')
                     ->name('api.password.update');
             }
 

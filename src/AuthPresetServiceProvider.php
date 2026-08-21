@@ -113,7 +113,7 @@ class AuthPresetServiceProvider extends PackageServiceProvider
 
     private function registerCaptchaMiddleware(): void
     {
-        foreach (['register.store', 'password.email', 'password.update'] as $name) {
+        foreach (['login.store', 'register.store', 'password.email', 'password.update'] as $name) {
             $route = app('router')->getRoutes()->getByName($name);
 
             if ($route !== null && in_array('web', $route->middleware(), true)) {

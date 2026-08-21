@@ -18,6 +18,9 @@ beforeEach(closure: function (): void {
         'avatar'         => 'https://example.com/avatar.jpg',
         'email_verified' => true,
     ]);
+    $this->socialiteUser->setRaw(user: [
+        'email_verified' => true,
+    ]);
     $this->socialiteUser->token = 'mock-token';
     $this->socialiteUser->refreshToken = 'mock-refresh-token';
     $this->socialiteUser->expiresIn = 3600;

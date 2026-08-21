@@ -68,6 +68,10 @@
             @endif
         </div>
 
+        @if (\Simtabi\Laranail\AuthPreset\Features::enabled(\Simtabi\Laranail\AuthPreset\Features::botProtection()))
+            <x-captcha />
+        @endif
+
         <div>
             <button
                 type="submit"

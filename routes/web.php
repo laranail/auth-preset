@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Simtabi\Laranail\AuthPreset\Features;
 use Simtabi\Laranail\AuthPreset\Support\AuthPreset;
 use Simtabi\Laranail\AuthPreset\Http\Controllers\Auth;
+use Simtabi\Laranail\AuthPreset\Http\Middleware\ValidateCaptcha;
 
 Route::middleware([...AuthPreset::webMiddleware(), 'auth:' . AuthPreset::guard()])
     ->get('/dashboard', fn () => view(AuthPreset::view('dashboard'), ['user' => request()->user()]))
@@ -16,12 +17,16 @@ Route::prefix(AuthPreset::webPrefix())
     ->group(function (): void {
         if (Features::enabled(Features::registration())) {
             Route::get('/register', [Auth\RegisterController::class, 'create'])->name('register');
-            Route::post('/register', [Auth\RegisterController::class, 'store'])->name('register.store');
+            Route::post('/register', [Auth\RegisterController::class, 'store'])
+                ->middleware('throttle:10,1')
+                ->name('register.store');
         }
 
         if (Features::enabled(Features::login())) {
             Route::get('/login', [Auth\LoginController::class, 'create'])->name('login');
-            Route::post('/login', [Auth\LoginController::class, 'store'])->name('login.store');
+            Route::post('/login', [Auth\LoginController::class, 'store'])
+                ->middleware(['throttle:10,1', ValidateCaptcha::class])
+                ->name('login.store');
         }
 
         if (Features::enabled(Features::social())) {
@@ -34,12 +39,14 @@ Route::prefix(AuthPreset::webPrefix())
                 ->name('password.request');
 
             Route::post('/forgot-password', [Auth\PasswordResetLinkController::class, 'store'])
+                ->middleware('throttle:10,1')
                 ->name('password.email');
 
             Route::get('/reset-password/{token}', [Auth\NewPasswordController::class, 'create'])
                 ->name('password.reset');
 
             Route::post('/reset-password', [Auth\NewPasswordController::class, 'store'])
+                ->middleware('throttle:10,1')
                 ->name('password.update');
         }
     });
