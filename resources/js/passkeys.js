@@ -65,9 +65,59 @@ const initializeLogin = (element) => {
 const initializeManagement = (element) => {
     const registerButton = element.querySelector('[data-passkey-register]');
     const registerError = element.querySelector('[data-passkey-register-error]');
+    const passwordConfirmation = element.querySelector('[data-password-confirmation]');
+    const passwordConfirmationError = element.querySelector('[data-password-confirmation-error]');
+    const passwordInput = element.querySelector('[data-password-confirmation-input]');
     const routes = {
         options: element.dataset.passkeyRegistrationOptionsUrl,
         submit: element.dataset.passkeyRegistrationUrl,
+    };
+
+    const confirmPassword = async () => {
+        const status = await fetch(element.dataset.passwordConfirmationStatusUrl, {
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+
+        if (status.ok && (await status.json()).confirmed) {
+            return;
+        }
+
+        passwordConfirmation.hidden = false;
+        passwordConfirmationError.hidden = true;
+
+        if (!passwordInput.value) {
+            passwordInput.focus();
+
+            throw new Error('Confirm your password before changing your passkeys.');
+        }
+
+        const response = await fetch(element.dataset.passwordConfirmationUrl, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({ password: passwordInput.value }),
+        });
+
+        if (response.ok) {
+            passwordInput.value = '';
+
+            return;
+        }
+
+        const payload = await response.json().catch(() => null);
+        const message = payload?.errors?.password?.[0] ?? 'Password confirmation failed. Please try again.';
+
+        showError(passwordConfirmationError, new Error(message));
+        passwordInput.focus();
+
+        throw new Error(message);
     };
 
     if (!Passkeys.isSupported()) {
@@ -82,6 +132,7 @@ const initializeManagement = (element) => {
         registerButton.disabled = true;
 
         try {
+            await confirmPassword();
             const name = element.querySelector('[data-passkey-name]')?.value?.trim();
 
             handleSuccess(await Passkeys.register({ name, routes }));
@@ -97,6 +148,7 @@ const initializeManagement = (element) => {
             button.disabled = true;
 
             try {
+                await confirmPassword();
                 const response = await fetch(button.dataset.passkeyDeleteUrl, {
                     method: 'DELETE',
                     headers: {

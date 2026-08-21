@@ -13,7 +13,23 @@
         data-passkey-registration-options-url="{{ route('passkey.registration-options') }}"
         data-passkey-registration-url="{{ route('passkey.store') }}"
         data-passkey-delete-url-template="{{ route('passkey.destroy', ['passkey' => '__PASSKEY__']) }}"
+        data-password-confirmation-status-url="{{ route('password.confirmation') }}"
+        data-password-confirmation-url="{{ route('password.confirm.store') }}"
     >
+        <div class="mb-8 rounded-md border border-gray-200 p-4" data-password-confirmation hidden>
+            <label for="passkey-password" class="block text-sm font-medium text-gray-700">Confirm your password</label>
+            <p class="mt-2 text-sm text-gray-600">Confirm your password before changing your passkeys.</p>
+            <input
+                id="passkey-password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                class="mt-3 block w-full rounded-md border-gray-300 shadow-xs"
+                data-password-confirmation-input
+            >
+            <p class="mt-3 text-sm text-red-600" data-password-confirmation-error hidden></p>
+        </div>
+
         <div class="mb-8 rounded-md border border-gray-200 p-4">
             <label for="passkey-name" class="block text-sm font-medium text-gray-700">Passkey name</label>
             <input
