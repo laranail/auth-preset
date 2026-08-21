@@ -2,6 +2,9 @@
 
 Blade authentication scaffolding for Laravel 13+, powered by [`laranail/auth-kit`](https://github.com/laranail/auth-kit).
 
+> [!WARNING]
+> This package is still in development. Breaking changes are imminent; use it in production at your own risk.
+
 The preset provides configurable web and API authentication routes, Fortify-backed password and profile flows, Blade views, social login integration, passkeys, and optional captcha-based bot protection.
 
 ## Requirements
