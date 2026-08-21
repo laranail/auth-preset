@@ -75,7 +75,7 @@
         <div>
             <button
                 type="submit"
-                class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
                 Sign in
             </button>
@@ -92,7 +92,7 @@
             <p class="mb-3 text-sm text-red-600" data-passkey-error hidden></p>
             <button
                 type="button"
-                class="flex w-full justify-center rounded-md border border-indigo-600 px-3 py-2 text-sm font-semibold text-indigo-600 shadow-xs hover:bg-indigo-50"
+                class="flex w-full justify-center rounded-md border border-indigo-600 px-3 py-2 text-sm font-semibold text-indigo-600 hover:bg-indigo-50"
                 data-passkey-login-button
             >
                 Sign in with a passkey
