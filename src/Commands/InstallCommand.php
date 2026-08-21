@@ -15,9 +15,9 @@ use Simtabi\Laranail\AuthPreset\Enums\AuthenticationFeature;
 
 class InstallCommand extends Command
 {
-    private const TAILWIND_BLADE_SOURCE = "@source '../../vendor/laravel/laranail/**/*.blade.php';";
+    private const string TAILWIND_BLADE_SOURCE = "@source '../../vendor/laravel/laranail/**/*.blade.php';";
 
-    private const PASSKEYS_NPM_PACKAGE = '@laravel/passkeys';
+    private const string PASSKEYS_NPM_PACKAGE = '@laravel/passkeys';
 
     protected $signature = 'laranail:authkit.install
         {--stack= : The frontend stack to install}
@@ -29,7 +29,6 @@ class InstallCommand extends Command
         {--bot-protection : Enable configurable captcha validation on guest forms}
         {--model= : The Eloquent authentication model to configure}
         {--publish-routes : Publish package route files for application ownership}
-        {--publish-controllers : Reserved for a future controller publishing workflow}
         {--publish-views : Publish Blade views for application ownership}
         {--force : Overwrite existing published files}';
 
@@ -37,40 +36,38 @@ class InstallCommand extends Command
 
     public function handle(): int
     {
-        $stack = $this->option('stack') ?? prompter()->select(
+        $stack = $this->option(key: 'stack') ?? prompter()->select(
             label: 'Which frontend stack would you like to install?',
             options: ['blade' => 'Blade'],
             default: 'blade',
         )->getResult();
 
         if ($stack !== 'blade') {
-            $this->error('Only the [blade] stack is currently supported.');
+            $this->error(string: 'Only the [blade] stack is currently supported.');
 
             return self::FAILURE;
         }
 
         $authModel = $this->input->isInteractive()
-            ? $this->resolveAuthModel(false, false, true)
+            ? $this->resolveAuthModel(wantsApi: false, wantsPasskeys: false, promptWithoutFeatures: true)
             : null;
 
         $features = $this->resolveFeatures();
-        $socialProviders = $this->resolveSocialProviders(in_array('social', $features, true));
-        $wantsApi = in_array('api', $features, true);
-        $wantsPasswordReset = in_array('password-reset', $features, true);
-        $wantsEmailVerification = in_array('email-verification', $features, true);
-        $wantsPasskeys = in_array('passkeys', $features, true);
-        $wantsBotProtection = in_array('bot-protection', $features, true);
+        $socialProviders = $this->resolveSocialProviders(featureSelected: in_array(needle: 'social', haystack: $features, strict: true));
+        $wantsApi = in_array(needle: 'api', haystack: $features, strict: true);
+        $wantsPasskeys = in_array(needle: 'passkeys', haystack: $features, strict: true);
+        $wantsBotProtection = in_array(needle: 'bot-protection', haystack: $features, strict: true);
 
-        if (count($socialProviders) === 0) {
-            $features = array_values(array_diff($features, ['social']));
-        } elseif (! in_array('social', $features, true)) {
+        if (count(value: $socialProviders) === 0) {
+            $features = array_values(array: array_diff($features, ['social']));
+        } elseif (! in_array(needle: 'social', haystack: $features, strict: true)) {
             $features[] = 'social';
         }
 
         if (! $this->input->isInteractive()) {
-            $authModel = $this->resolveAuthModel($wantsApi, $wantsPasskeys);
+            $authModel = $this->resolveAuthModel(wantsApi: $wantsApi, wantsPasskeys: $wantsPasskeys);
         } elseif (($wantsApi || $wantsPasskeys) && $authModel === null) {
-            $authModel = $this->resolveAuthModel($wantsApi, $wantsPasskeys);
+            $authModel = $this->resolveAuthModel(wantsApi: $wantsApi, wantsPasskeys: $wantsPasskeys);
         } elseif (! $wantsApi && ! $wantsPasskeys) {
             $authModel = null;
         }
@@ -79,7 +76,7 @@ class InstallCommand extends Command
             return self::FAILURE;
         }
 
-        if ($authModel !== null && ! $this->configureAuthModel($authModel, $wantsApi, $wantsPasskeys)) {
+        if ($authModel !== null && ! $this->configureAuthModel(model: $authModel, wantsApi: $wantsApi, wantsPasskeys: $wantsPasskeys)) {
             return self::FAILURE;
         }
 
@@ -91,69 +88,65 @@ class InstallCommand extends Command
             $this->installPasskeyFrontend();
         }
 
-        if (count($socialProviders) > 0) {
+        if (count(value: $socialProviders) > 0) {
             $this->publish(tag: 'auth-kit-social-migrations');
             $this->newLine();
-            $this->info('Social login migration published. Run `php artisan migrate` to create the socials table.');
+            $this->info(string: 'Social login migration published. Run `php artisan migrate` to create the socials table.');
         }
 
         if ($wantsApi) {
             $this->publish(tag: 'sanctum-migrations');
             $this->newLine();
-            $this->info('Sanctum token migration published. Run `php artisan migrate` to create the personal_access_tokens table.');
+            $this->info(string: 'Sanctum token migration published. Run `php artisan migrate` to create the personal_access_tokens table.');
         }
 
         if ($wantsPasskeys) {
             $this->publish(tag: 'auth-kit-passkey-migrations');
             $this->newLine();
-            $this->info('Passkeys migration published. Run `php artisan migrate` to create the passkeys table.');
-            $this->line('The @laravel/passkeys browser client and Blade event handlers were added to resources/js. Run `npm install` and rebuild your frontend assets.');
+            $this->info(string: 'Passkeys migration published. Run `php artisan migrate` to create the passkeys table.');
+            $this->line(string: 'The @laravel/passkeys browser client and Blade event handlers were added to resources/js. Run `npm install` and rebuild your frontend assets.');
         }
 
         if ($authModel !== null) {
             $this->newLine();
-            $this->info("Authentication model configured: {$authModel}.");
+            $this->info(string: "Authentication model configured: {$authModel}.");
         }
 
         if ($wantsApi || $wantsPasskeys) {
-            $this->line('Migrations were published to the application database/migrations directory. If this model belongs to a module, move the migrations to that module only if its module system owns migration loading.');
+            $this->line(string: 'Migrations were published to the application database/migrations directory. If this model belongs to a module, move the migrations to that module only if its module system owns migration loading.');
         }
 
-        if ($this->option('publish-routes')) {
-            $this->publish('auth-preset-routes');
+        if ($this->option(key: 'publish-routes')) {
+            $this->publish(tag: 'auth-preset-routes');
         }
 
-        if ($this->option('publish-views')) {
-            $this->publish('auth-preset-views');
+        if ($this->option(key: 'publish-views')) {
+            $this->publish(tag: 'auth-preset-views');
         }
 
-        if ($this->option('publish-controllers')) {
-            $this->warn('Controller publishing is not needed yet: extend the package controllers or use auth-kit contracts in your application controller.');
-        }
+        $this->configureFeatures(features: $features, providers: $socialProviders);
 
-        $this->configureFeatures($features, $socialProviders);
-
-        $this->info('auth-preset is ready. Package routes are registered automatically.');
-        $this->line('Visit /auth/register or /auth/login. Review config/auth-preset.php to enable or disable features.');
+        $this->info(string: 'auth-preset is ready. Package routes are registered automatically.');
+        $this->line(string: 'Visit /auth/register or /auth/login. Review config/auth-preset.php to enable or disable features.');
 
         if ($wantsApi) {
-            $this->line('API routes are enabled at /api/auth. Use Sanctum tokens for authentication.');
+            $this->line(string: 'API routes are enabled at /api/auth. Use Sanctum tokens for authentication.');
         }
 
-        if (count($socialProviders) > 0) {
+        if (count(value: $socialProviders) > 0) {
             $this->newLine();
-            $this->info('Social login enabled for: ' . implode(', ', $socialProviders) . '.');
-            $this->line('Set your OAuth credentials in .env for each enabled provider.');
+            $this->info(string: 'Social login enabled for: ' . implode(separator: ', ', array: $socialProviders) . '.');
+            $this->line(string: 'Set your OAuth credentials in .env for each enabled provider.');
         }
 
         if ($wantsBotProtection) {
             $this->newLine();
-            $this->info('Bot protection enabled for guest forms.');
-            $this->line('Turnstile is the default provider. Set CAPTCHA_PROVIDER to use another supported provider.');
-            $this->line('Add CAPTCHA_SITE_KEY and CAPTCHA_SECRET_KEY to your .env file when the selected provider requires credentials.');
+            $this->info(string: 'Bot protection enabled for guest forms.');
+            $this->line(string: 'Turnstile is the default provider. Set CAPTCHA_PROVIDER to use another supported provider.');
+            $this->line(string: 'Add CAPTCHA_SITE_KEY and CAPTCHA_SECRET_KEY to your .env file when the selected provider requires credentials.');
         }
 
-        $this->configureEnvironment($socialProviders, $wantsBotProtection);
+        $this->configureEnvironment(providers: $socialProviders, wantsBotProtection: $wantsBotProtection);
 
         return self::SUCCESS;
     }
@@ -165,17 +158,17 @@ class InstallCommand extends Command
         $explicit = [];
 
         foreach (['api', 'password-reset', 'email-verification', 'passkeys', 'bot-protection'] as $feature) {
-            if ($this->input->hasParameterOption('--' . $feature)) {
+            if ($this->input->hasParameterOption(values: '--' . $feature)) {
                 $explicit[] = $feature;
             }
         }
 
-        if (count($this->option('social')) > 0) {
+        if (count(value: $this->option(key: 'social')) > 0) {
             $explicit[] = 'social';
         }
 
         if (! $this->input->isInteractive()) {
-            return array_values(array_unique(array_merge([
+            return array_values(array: array_unique(array: array_merge([
                 'login',
                 'registration',
                 'logout',
@@ -190,26 +183,26 @@ class InstallCommand extends Command
         $features = prompter()->multiselect(
             label: 'Which authentication feature would you like to enable?',
             options: $authenticationFeatures,
-            default: array_keys($authenticationFeatures),
-            scroll: count($authenticationFeatures),
+            default: array_keys(array: $authenticationFeatures),
+            scroll: count(value: $authenticationFeatures),
             info: static fn (string $feature): ?string => $featureDescriptions[$feature] ?? null,
             hint: 'All features are selected by default. Press space to disable features you do not need.',
         )->getResult();
 
-        return array_values(array_unique(array_merge($features, $explicit)));
+        return array_values(array: array_unique(array: array_merge($features, $explicit)));
     }
 
     /** @return array<int, string> */
     private function resolveSocialProviders(bool $featureSelected): array
     {
-        $optionProviders = $this->option('social');
+        $optionProviders = $this->option(key: 'social');
 
-        if (count($optionProviders) > 0) {
-            return array_values(array_filter(
-                $optionProviders,
-                static fn (mixed $provider): bool => is_string($provider) && Validator::make(
+        if (count(value: $optionProviders) > 0) {
+            return array_values(array: array_filter(
+                array: $optionProviders,
+                callback: static fn (mixed $provider): bool => is_string(value: $provider) && Validator::make(
                     data: ['provider' => $provider],
-                    rules: ['provider' => [new EnumValue(SocialProvider::class)]],
+                    rules: ['provider' => [new EnumValue(enumClass: SocialProvider::class)]],
                 )->passes(),
             ));
         }
@@ -259,21 +252,21 @@ class InstallCommand extends Command
 
         $models = $this->eloquentAuthModels();
 
-        if (count($models) === 0) {
+        if (count(value: $models) === 0) {
             if ($promptWithoutFeatures) {
                 return null;
             }
 
-            $this->error('Sanctum and passkeys require an Eloquent authentication model. No Eloquent auth provider was found in config/auth.php.');
+            $this->error(string: 'Sanctum and passkeys require an Eloquent authentication model. No Eloquent auth provider was found in config/auth.php.');
 
             return null;
         }
 
-        $requestedModel = $this->option('model');
+        $requestedModel = $this->option(key: 'model');
 
         if ($requestedModel !== null) {
-            if (! array_key_exists($requestedModel, $models)) {
-                $this->error("The model [{$requestedModel}] is not configured by an Eloquent auth provider.");
+            if (! array_key_exists(key: $requestedModel, array: $models)) {
+                $this->error(string: "The model [{$requestedModel}] is not configured by an Eloquent auth provider.");
 
                 return null;
             }
@@ -282,11 +275,11 @@ class InstallCommand extends Command
         }
 
         if (! $this->input->isInteractive()) {
-            if (count($models) === 1) {
-                return array_key_first($models);
+            if (count(value: $models) === 1) {
+                return array_key_first(array: $models);
             }
 
-            $this->error('Multiple Eloquent auth models were found. Re-run the installer with --model="App\\Models\\User".');
+            $this->error(string: 'Multiple Eloquent auth models were found. Re-run the installer with --model="App\\Models\\User".');
 
             return null;
         }
@@ -294,13 +287,13 @@ class InstallCommand extends Command
         $options = [];
 
         foreach ($models as $model => $providers) {
-            $options[$model] = $model . ' (' . implode(', ', $providers) . ')';
+            $options[$model] = $model . ' (' . implode(separator: ', ', array: $providers) . ')';
         }
 
         return prompter()->select(
             label: 'Which auth provider should receive the authentication traits?',
             options: $options,
-            default: array_key_first($models),
+            default: array_key_first(array: $models),
         )->getResult();
     }
 
@@ -309,14 +302,14 @@ class InstallCommand extends Command
     {
         $models = [];
 
-        foreach ((array) config('auth.providers', []) as $providerName => $provider) {
-            if (! is_array($provider) || ($provider['driver'] ?? null) !== 'eloquent') {
+        foreach ((array) config(key: 'auth.providers', default: []) as $providerName => $provider) {
+            if (! is_array(value: $provider) || ($provider['driver'] ?? null) !== 'eloquent') {
                 continue;
             }
 
             $model = $provider['model'] ?? null;
 
-            if (! is_string($model) || $model === '' || ! is_a($model, Model::class, true)) {
+            if (! is_string(value: $model) || $model === '' || ! is_a(object_or_class: $model, class: Model::class, allow_string: true)) {
                 continue;
             }
 
@@ -329,54 +322,54 @@ class InstallCommand extends Command
 
     private function configureAuthModel(string $model, bool $wantsApi, bool $wantsPasskeys): bool
     {
-        if (! class_exists($model)) {
-            $this->error("The configured authentication model [{$model}] could not be loaded.");
+        if (! class_exists(class: $model)) {
+            $this->error(string: "The configured authentication model [{$model}] could not be loaded.");
 
             return false;
         }
 
-        $reflection = new ReflectionClass($model);
+        $reflection = new ReflectionClass(objectOrClass: $model);
         $file = $reflection->getFileName();
 
         if ($file === false) {
-            $this->error("The authentication model [{$model}] does not have a writable source file.");
+            $this->error(string: "The authentication model [{$model}] does not have a writable source file.");
 
             return false;
         }
 
-        return $this->configureModelFile($file, $reflection->getShortName(), $wantsApi, $wantsPasskeys);
+        return $this->configureModelFile(file: $file, className: $reflection->getShortName(), wantsApi: $wantsApi, wantsPasskeys: $wantsPasskeys);
     }
 
     private function configureModelFile(string $file, string $className, bool $wantsApi, bool $wantsPasskeys): bool
     {
-        if (! is_file($file) || ! is_readable($file) || ! is_writable($file)) {
-            $this->error("The authentication model file [{$file}] must be readable and writable.");
+        if (! is_file(filename: $file) || ! is_readable(filename: $file) || ! is_writable(filename: $file)) {
+            $this->error(string: "The authentication model file [{$file}] must be readable and writable.");
 
             return false;
         }
 
-        $contents = file_get_contents($file);
+        $contents = file_get_contents(filename: $file);
 
         if ($contents === false) {
-            $this->error("Unable to read the authentication model file [{$file}].");
+            $this->error(string: "Unable to read the authentication model file [{$file}].");
 
             return false;
         }
 
         if ($wantsApi) {
-            $contents = $this->addModelImport($contents, 'Laravel\\Sanctum\\HasApiTokens');
-            $contents = $this->addModelTrait($contents, $className, 'HasApiTokens');
+            $contents = $this->addModelImport(contents: $contents, import: 'Laravel\\Sanctum\\HasApiTokens');
+            $contents = $this->addModelTrait(contents: $contents, className: $className, trait: 'HasApiTokens');
         }
 
         if ($wantsPasskeys) {
-            $contents = $this->addModelImport($contents, 'Laravel\\Fortify\\Contracts\\PasskeyUser');
-            $contents = $this->addModelImport($contents, 'Simtabi\\Laranail\\Auth\\PasskeyAuthenticatable');
-            $contents = $this->addModelInterface($contents, $className, 'PasskeyUser');
-            $contents = $this->addModelTrait($contents, $className, 'PasskeyAuthenticatable');
+            $contents = $this->addModelImport(contents: $contents, import: 'Laravel\\Fortify\\Contracts\\PasskeyUser');
+            $contents = $this->addModelImport(contents: $contents, import: 'Simtabi\\Laranail\\Auth\\PasskeyAuthenticatable');
+            $contents = $this->addModelInterface(contents: $contents, className: $className, interface: 'PasskeyUser');
+            $contents = $this->addModelTrait(contents: $contents, className: $className, trait: 'PasskeyAuthenticatable');
         }
 
-        if (file_put_contents($file, $contents) === false) {
-            $this->error("Unable to update the authentication model file [{$file}].");
+        if (file_put_contents(filename: $file, data: $contents) === false) {
+            $this->error(string: "Unable to update the authentication model file [{$file}].");
 
             return false;
         }
@@ -386,17 +379,17 @@ class InstallCommand extends Command
 
     private function addModelImport(string $contents, string $import): string
     {
-        $shortName = Str::afterLast($import, '\\');
+        $shortName = Str::afterLast(subject: $import, search: '\\');
 
-        if (preg_match('/^use\\s+[^;]+\\\\' . preg_quote($shortName, '/') . '(?:\\s+as\\s+' . preg_quote($shortName, '/') . ')?\\s*;/m', $contents) === 1) {
+        if (preg_match(pattern: '/^use\\s+[^;]+\\\\' . preg_quote(str: $shortName, delimiter: '/') . '(?:\\s+as\\s+' . preg_quote(str: $shortName, delimiter: '/') . ')?\\s*;/m', subject: $contents) === 1) {
             return $contents;
         }
 
         $updated = preg_replace(
-            '/^(namespace\\s+[^;]+;)(\\R)/m',
-            "$1$2use {$import};$2",
-            $contents,
-            1,
+            pattern: '/^(namespace\\s+[^;]+;)(\\R)/m',
+            replacement: "$1$2use {$import};$2",
+            subject: $contents,
+            limit: 1,
         );
 
         return $updated ?? $contents;
@@ -405,26 +398,26 @@ class InstallCommand extends Command
     private function addModelInterface(string $contents, string $className, string $interface): string
     {
         $updated = preg_replace_callback(
-            '/(\\bclass\\s+' . preg_quote($className, '/') . '\\b)([^\\{]*)(\\{)/',
-            static function (array $matches) use ($interface): string {
-                if (str_contains($matches[2], $interface)) {
-                    return implode('', $matches);
+            pattern: '/(\\bclass\\s+' . preg_quote(str: $className, delimiter: '/') . '\\b)([^\\{]*)(\\{)/',
+            callback: static function (array $matches) use ($interface): string {
+                if (str_contains(haystack: $matches[2], needle: $interface)) {
+                    return implode(separator: '', array: $matches);
                 }
 
-                if (preg_match('/implements\\s+([^\\{]+)/', $matches[2]) === 1) {
-                    $header = mb_rtrim($matches[2]) . ', ' . $interface;
-                    $header .= mb_substr($matches[2], mb_strlen(mb_rtrim($matches[2])));
+                if (preg_match(pattern: '/implements\\s+([^\\{]+)/', subject: $matches[2]) === 1) {
+                    $header = mb_rtrim(string: $matches[2]) . ', ' . $interface;
+                    $header .= mb_substr(string: $matches[2], start: mb_strlen(string: mb_rtrim(string: $matches[2])));
 
                     return $matches[1] . $header . $matches[3];
                 }
 
-                $header = mb_rtrim($matches[2]) . ' implements ' . $interface;
-                $header .= mb_substr($matches[2], mb_strlen(mb_rtrim($matches[2])));
+                $header = mb_rtrim(string: $matches[2]) . ' implements ' . $interface;
+                $header .= mb_substr(string: $matches[2], start: mb_strlen(string: mb_rtrim(string: $matches[2])));
 
                 return $matches[1] . $header . $matches[3];
             },
-            $contents,
-            1,
+            subject: $contents,
+            limit: 1,
         );
 
         return $updated ?? $contents;
@@ -432,15 +425,15 @@ class InstallCommand extends Command
 
     private function addModelTrait(string $contents, string $className, string $trait): string
     {
-        if (preg_match('/^\\s*use\\s+' . preg_quote($trait, '/') . '\\s*;/m', $contents) === 1) {
+        if (preg_match(pattern: '/^\\s*use\\s+' . preg_quote(str: $trait, delimiter: '/') . '\\s*;/m', subject: $contents) === 1) {
             return $contents;
         }
 
         $updated = preg_replace(
-            '/(\\bclass\\s+' . preg_quote($className, '/') . '\\b[^\\{]*\\{)(\\R)/',
-            "$1$2    use {$trait};$2",
-            $contents,
-            1,
+            pattern: '/(\\bclass\\s+' . preg_quote(str: $className, delimiter: '/') . '\\b[^\\{]*\\{)(\\R)/',
+            replacement: "$1$2    use {$trait};$2",
+            subject: $contents,
+            limit: 1,
         );
 
         return $updated ?? $contents;
@@ -448,88 +441,88 @@ class InstallCommand extends Command
 
     private function configureTailwindSource(?string $cssPath = null): bool
     {
-        $cssPath ??= base_path('resources/css/app.css');
+        $cssPath ??= base_path(path: 'resources/css/app.css');
 
-        if (! file_exists($cssPath)) {
+        if (! file_exists(filename: $cssPath)) {
             return false;
         }
 
-        $contents = file_get_contents($cssPath);
+        $contents = file_get_contents(filename: $cssPath);
 
-        if (str_contains($contents, self::TAILWIND_BLADE_SOURCE)) {
+        if (str_contains(haystack: $contents, needle: self::TAILWIND_BLADE_SOURCE)) {
             return false;
         }
 
         $frameworkSource = "@source '../../storage/framework/views/*.php';";
 
-        if (str_contains($contents, $frameworkSource)) {
+        if (str_contains(haystack: $contents, needle: $frameworkSource)) {
             $replacementCount = 0;
             $contents = str_replace(
-                $frameworkSource,
-                $frameworkSource . "\n" . self::TAILWIND_BLADE_SOURCE,
-                $contents,
-                $replacementCount,
+                search: $frameworkSource,
+                replace: $frameworkSource . "\n" . self::TAILWIND_BLADE_SOURCE,
+                subject: $contents,
+                count: $replacementCount,
             );
         } else {
-            $contents = mb_rtrim($contents, "\n") . "\n\n" . self::TAILWIND_BLADE_SOURCE . "\n";
+            $contents = mb_rtrim(string: $contents, characters: "\n") . "\n\n" . self::TAILWIND_BLADE_SOURCE . "\n";
         }
 
-        file_put_contents($cssPath, $contents);
+        file_put_contents(filename: $cssPath, data: $contents);
 
         return true;
     }
 
     private function installPasskeyFrontend(?string $packagePath = null, ?string $appJsPath = null, ?string $passkeysJsPath = null): bool
     {
-        $packagePath ??= base_path('package.json');
-        $appJsPath ??= base_path('resources/js/app.js');
-        $passkeysJsPath ??= base_path('resources/js/passkeys.js');
+        $packagePath ??= base_path(path: 'package.json');
+        $appJsPath ??= base_path(path: 'resources/js/app.js');
+        $passkeysJsPath ??= base_path(path: 'resources/js/passkeys.js');
         $changed = false;
 
-        if (file_exists($packagePath)) {
-            $package = json_decode((string) file_get_contents($packagePath), true);
+        if (file_exists(filename: $packagePath)) {
+            $package = json_decode(json: (string) file_get_contents(filename: $packagePath), associative: true);
 
-            if (! is_array($package)) {
-                $this->warn('Could not update package.json because it does not contain valid JSON.');
+            if (! is_array(value: $package)) {
+                $this->warn(string: 'Could not update package.json because it does not contain valid JSON.');
             } elseif (! isset($package['dependencies'][self::PASSKEYS_NPM_PACKAGE])
                 && ! isset($package['devDependencies'][self::PASSKEYS_NPM_PACKAGE])) {
                 $package['dependencies'] ??= [];
                 $package['dependencies'][self::PASSKEYS_NPM_PACKAGE] = '^0.2.0';
-                ksort($package['dependencies']);
-                file_put_contents($packagePath, json_encode($package, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+                ksort(array: $package['dependencies']);
+                file_put_contents(filename: $packagePath, data: json_encode(value: $package, flags: JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
                 $changed = true;
             }
         }
 
         $sourcePath = __DIR__ . '/../../resources/js/passkeys.js';
 
-        if (! file_exists($passkeysJsPath) && file_exists($sourcePath)) {
-            $directory = dirname($passkeysJsPath);
+        if (! file_exists(filename: $passkeysJsPath) && file_exists(filename: $sourcePath)) {
+            $directory = dirname(path: $passkeysJsPath);
 
-            if (! is_dir($directory)) {
-                mkdir($directory, 0755, true);
+            if (! is_dir(filename: $directory)) {
+                mkdir(directory: $directory, permissions: 0755, recursive: true);
             }
 
-            copy($sourcePath, $passkeysJsPath);
+            copy(from: $sourcePath, to: $passkeysJsPath);
             $changed = true;
         }
 
         $import = "import './passkeys';";
 
-        if (! file_exists($appJsPath)) {
-            $directory = dirname($appJsPath);
+        if (! file_exists(filename: $appJsPath)) {
+            $directory = dirname(path: $appJsPath);
 
-            if (! is_dir($directory)) {
-                mkdir($directory, 0755, true);
+            if (! is_dir(filename: $directory)) {
+                mkdir(directory: $directory, permissions: 0755, recursive: true);
             }
 
-            file_put_contents($appJsPath, $import . "\n");
+            file_put_contents(filename: $appJsPath, data: $import . "\n");
             $changed = true;
         } else {
-            $contents = file_get_contents($appJsPath);
+            $contents = file_get_contents(filename: $appJsPath);
 
-            if ($contents !== false && ! preg_match('/import\s+[\'\"]\.\/passkeys[\'\"]\s*;/', $contents)) {
-                file_put_contents($appJsPath, mb_rtrim($contents, "\n") . "\n\n" . $import . "\n");
+            if ($contents !== false && ! preg_match(pattern: '/import\s+[\'\"]\.\/passkeys[\'\"]\s*;/', subject: $contents)) {
+                file_put_contents(filename: $appJsPath, data: mb_rtrim(string: $contents, characters: "\n") . "\n\n" . $import . "\n");
                 $changed = true;
             }
         }
@@ -543,13 +536,13 @@ class InstallCommand extends Command
      */
     private function configureFeatures(array $features, array $providers, ?string $configPath = null): void
     {
-        $configPath ??= config_path('auth-preset.php');
+        $configPath ??= config_path(path: 'auth-preset.php');
 
-        if (! file_exists($configPath)) {
+        if (! file_exists(filename: $configPath)) {
             return;
         }
 
-        $contents = file_get_contents($configPath);
+        $contents = file_get_contents(filename: $configPath);
         $featureMethods = [
             'login'                      => 'login',
             'registration'               => 'registration',
@@ -566,42 +559,42 @@ class InstallCommand extends Command
         $featureLines = [];
 
         foreach ($featureMethods as $feature => $method) {
-            if (in_array($feature, $features, true) && ($feature !== 'social' || count($providers) > 0)) {
+            if (in_array(needle: $feature, haystack: $features, strict: true) && ($feature !== 'social' || count(value: $providers) > 0)) {
                 $featureLines[] = "        \\Simtabi\\Laranail\\AuthPreset\\Features::{$method}(),";
             }
         }
 
-        $featureBlock = "    'features' => [\n" . implode("\n", $featureLines) . "\n    ],";
+        $featureBlock = "    'features' => [\n" . implode(separator: "\n", array: $featureLines) . "\n    ],";
         $contents = preg_replace(
-            "/    'features'\s*=>\s*\[(?:.|\R)*?\n    \],/",
-            $featureBlock,
-            $contents,
-            1,
+            pattern: "/    'features'\s*=>\s*\[(?:.|\R)*?\n    \],/",
+            replacement: $featureBlock,
+            subject: $contents,
+            limit: 1,
         ) ?? $contents;
 
-        $providerArray = "['" . implode("', '", $providers) . "']";
+        $providerArray = "['" . implode(separator: "', '", array: $providers) . "']";
         $contents = preg_replace(
-            "/'providers'\s*=>\s*\[[^\]]*\]/",
-            "'providers' => {$providerArray}",
-            $contents,
-            1,
+            pattern: "/'providers'\s*=>\s*\[[^\]]*\]/",
+            replacement: "'providers' => {$providerArray}",
+            subject: $contents,
+            limit: 1,
         ) ?? $contents;
 
-        file_put_contents($configPath, $contents);
+        file_put_contents(filename: $configPath, data: $contents);
     }
 
     /** @param array<int, string> $providers */
     private function configureEnvironment(array $providers, bool $wantsBotProtection, ?string $envPath = null, ?string $envExamplePath = null): void
     {
-        $envPath ??= base_path('.env');
-        $envExamplePath ??= base_path('.env.example');
+        $envPath ??= base_path(path: '.env');
+        $envExamplePath ??= base_path(path: '.env.example');
         $variables = [];
 
         foreach ($providers as $provider) {
-            $upper = Str::upper($provider);
+            $upper = Str::upper(value: $provider);
             $variables["AUTH_KIT_{$upper}_CLIENT_ID"] = '';
             $variables["AUTH_KIT_{$upper}_CLIENT_SECRET"] = '';
-            $variables["AUTH_KIT_{$upper}_REDIRECT"] = url("/auth/social/{$provider}/callback");
+            $variables["AUTH_KIT_{$upper}_REDIRECT"] = url(path: "/auth/social/{$provider}/callback");
         }
 
         if ($wantsBotProtection) {
@@ -610,23 +603,23 @@ class InstallCommand extends Command
             $variables['CAPTCHA_SECRET_KEY'] = '';
         }
 
-        if (count($variables) === 0) {
+        if (count(value: $variables) === 0) {
             return;
         }
 
         foreach ([$envPath, $envExamplePath] as $path) {
-            $this->appendMissingEnvironmentVariables($path, $variables);
+            $this->appendMissingEnvironmentVariables(path: $path, variables: $variables);
         }
     }
 
     /** @param array<string, string> $variables */
     private function appendMissingEnvironmentVariables(string $path, array $variables): void
     {
-        if (! file_exists($path)) {
+        if (! file_exists(filename: $path)) {
             return;
         }
 
-        $existing = file_get_contents($path);
+        $existing = file_get_contents(filename: $path);
 
         if ($existing === false) {
             return;
@@ -635,14 +628,14 @@ class InstallCommand extends Command
         $missing = [];
 
         foreach ($variables as $key => $value) {
-            if (preg_match('/^\s*(?:export\s+)?' . preg_quote($key, '/') . '\s*=/m', $existing) === 1) {
+            if (preg_match(pattern: '/^\s*(?:export\s+)?' . preg_quote(str: $key, delimiter: '/') . '\s*=/m', subject: $existing) === 1) {
                 continue;
             }
 
             $missing[$key] = $value;
         }
 
-        if (count($missing) === 0) {
+        if (count(value: $missing) === 0) {
             return;
         }
 
@@ -652,17 +645,17 @@ class InstallCommand extends Command
             $lines[] = "{$key}={$value}";
         }
 
-        file_put_contents($path, mb_rtrim($existing, "\n") . "\n\n# Auth Kit environment variables\n" . implode("\n", $lines) . "\n");
+        file_put_contents(filename: $path, data: mb_rtrim(string: $existing, characters: "\n") . "\n\n# Auth Kit environment variables\n" . implode(separator: "\n", array: $lines) . "\n");
     }
 
     private function publish(string $tag): void
     {
         $parameters = ['--tag' => $tag];
 
-        if ($this->option('force')) {
+        if ($this->option(key: 'force')) {
             $parameters['--force'] = true;
         }
 
-        $this->call('vendor:publish', $parameters);
+        $this->call(command: 'vendor:publish', arguments: $parameters);
     }
 }

@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Simtabi\Laranail\AuthPreset\Features;
+use Simtabi\Laranail\AuthPreset\Http\Middleware\ValidateCaptcha;
+use Simtabi\Laranail\AuthPreset\Http\Controllers\Api\LoginController as ApiLoginController;
+use Simtabi\Laranail\AuthPreset\Http\Controllers\Auth\LoginController as WebLoginController;
+use Simtabi\Laranail\AuthPreset\Http\Controllers\Api\RegisterController as ApiRegisterController;
+use Simtabi\Laranail\AuthPreset\Http\Controllers\Auth\RegisterController as WebRegisterController;
 
 it(description: 'registers the dashboard route', closure: function (): void {
     $route = Route::getRoutes()->getByName('dashboard');
@@ -22,6 +27,27 @@ it(description: 'registers login, registration, and API routes when features are
         ->and(value: $routes)->toHaveKey(key: 'register.store')
         ->and(value: $routes)->toHaveKey(key: 'api.login')
         ->and(value: $routes)->toHaveKey(key: 'api.register');
+});
+
+it(description: 'throttles sensitive authentication submissions', closure: function (): void {
+    foreach ([WebLoginController::class, WebRegisterController::class, ApiLoginController::class, ApiRegisterController::class] as $controller) {
+        $route = collect(Route::getRoutes()->getRoutes())->first(
+            fn ($route): bool => $route->getActionName() === $controller . '@store',
+        );
+
+        expect($route)->not->toBeNull();
+
+        expect($route->gatherMiddleware())->toContain('throttle:10,1');
+    }
+});
+
+it(description: 'validates captcha on web login submissions', closure: function (): void {
+    $route = collect(Route::getRoutes()->getRoutes())->first(
+        fn ($route): bool => $route->getActionName() === WebLoginController::class . '@store',
+    );
+
+    expect($route)->not->toBeNull()
+        ->and($route->gatherMiddleware())->toContain(ValidateCaptcha::class);
 });
 
 it(description: 'registers Fortify password reset routes when feature is enabled', closure: function (): void {

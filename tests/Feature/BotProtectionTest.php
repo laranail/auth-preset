@@ -13,6 +13,10 @@ it('renders the configured captcha provider on protected guest forms', function 
     $this->get(route('register'))
         ->assertOk()
         ->assertSee('cf-turnstile', escape: false);
+
+    $this->get(route('login'))
+        ->assertOk()
+        ->assertSee('cf-turnstile', escape: false);
 });
 
 it('uses Turnstile and config credentials by default', function (): void {
